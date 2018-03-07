@@ -17,6 +17,11 @@ def index():
 	# return "hello"
 	return app.send_static_file('index.html')
 
+# @app.route('/favicon.ico')
+# def favicon():
+# 	return send_static_file('favicon.ico')
+
+
 @app.route("/api/schools/")
 def get_schools():
 	schools = School.query.all()
@@ -36,10 +41,16 @@ def get_school(id):
 def add_school():
 	pass
 
-@app.route('/<path:path>')
-def static_proxy(path):
-	# send_static_file will guess the correct MIME type
-	return app.send_static_file(path)
+# # error handlers
+# @app.errorhandler(404)
+# def page_not_found(e):
+# 	return render_template('404.html'), 404
+
+
+# @app.route('/<path:path>')
+# def static_proxy(path):
+# 	# send_static_file will guess the correct MIME type
+# 	return app.send_static_file(path)
 
 if __name__=="__main__":
 	app.run(debug=True)
