@@ -17,11 +17,6 @@ def index():
 	# return "hello"
 	return app.send_static_file('index.html')
 
-# @app.route('/favicon.ico')
-# def favicon():
-# 	return send_static_file('favicon.ico')
-
-
 @app.route("/api/schools/")
 def get_schools():
 	schools = School.query.all()
@@ -41,10 +36,15 @@ def get_school(id):
 def add_school():
 	pass
 
+
 # # error handlers
 # @app.errorhandler(404)
 # def page_not_found(e):
 # 	return render_template('404.html'), 404
+
+# @app.route('/favicon.ico')
+# def favicon():
+# 	return send_static_file('favicon.ico')
 
 
 # @app.route('/<path:path>')
