@@ -12,10 +12,21 @@ db.init_app(app)
 def pre_dict(queries):
 	return list(map(lambda x: x.to_dict(),queries))
 
-@app.route("/")
-def index():
-	# return "hello"
+# @app.route("/")
+# def index():
+# 	# return "hello"
+# 	return app.send_static_file('index.html')
+
+# Program catch-all for routes to send the static index.html file to the current app
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
 	return app.send_static_file('index.html')
+
+# @app.route('/<path:path>')
+# def static_proxy(path):
+# 	# send_static_file will guess the correct MIME type
+# 	return app.send_static_file(path)
 
 @app.route("/api/schools/")
 def get_schools():
@@ -46,11 +57,6 @@ def add_school():
 # def favicon():
 # 	return send_static_file('favicon.ico')
 
-
-# @app.route('/<path:path>')
-# def static_proxy(path):
-# 	# send_static_file will guess the correct MIME type
-# 	return app.send_static_file(path)
 
 if __name__=="__main__":
 	app.run(debug=True)
