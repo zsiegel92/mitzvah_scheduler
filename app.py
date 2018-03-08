@@ -4,7 +4,7 @@ import os
 from database import db
 from models import School
 
-app = Flask(__name__)
+app = Flask(__name__,static_folder='mitzvah/static')
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
