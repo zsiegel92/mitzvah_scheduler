@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
 import { School } from '../school';
 
-import { SchoolSelectorComponent } from './school-selector/school-selector.component';
-import { DatepickerComponent } from './datepicker/datepicker.component';
+import { SchoolSelectorComponent } from '../school-selector/school-selector.component';
+import { DatepickerComponent } from '../datepicker/datepicker.component';
 
 
 @Component({

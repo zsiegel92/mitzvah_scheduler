@@ -1,38 +1,37 @@
-import {Component, Injectable} from '@angular/core';
-import {NgbDateAdapter, NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import {Component} from '@angular/core';
+import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 
-/**
- * Example of a Native Date adapter
- */
-@Injectable()
-export class NgbDateNativeAdapter extends NgbDateAdapter<Date> {
-
-  fromModel(date: Date): NgbDateStruct {
-    return (date && date.getFullYear) ? {year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate()} : null;
-  }
-
-  toModel(date: NgbDateStruct): Date {
-    return date ? new Date(date.year, date.month - 1, date.day) : null;
-  }
-}
+const now = new Date();
 
 @Component({
-  selector: 'app-datepicker',
-  templateUrl: './datepicker.component.html',
+ selector: 'app-datepicker',
   styleUrls: ['./datepicker.component.css'],
-  providers: [{provide: NgbDateAdapter, useClass: NgbDateNativeAdapter}]
+  templateUrl: './datepicker.component.html',
+  providers: [
+  	]
 })
-export class DatepickerComponent implements OnInit {
+export class DatepickerComponent {
 
-	model1: Date;
-	model2: Date;
+  model: NgbDateStruct;
+  date: {year: number, month: number};
 
-	get today() {
-	  return new Date();
-	}
+  selectThisWeek() {
+    this.model = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() + 6 - (now.getDay() % 7)};
+  }
 
-	constructor() { }
+  // non-Saturdays are disabled
+  isDisabled(a_date: NgbDateStruct) {
+      const d = new Date(a_date.year, a_date.month - 1, a_date.day);
+      return d.getDay() !== 6;
+      // return true;
+    }
 
-	ngOnInit() {
-	}
+  selectToday() {
+    this.model = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate()};
+  }
+
+  constructor() {
+  	this.selectThisWeek();
+  	// this.dp.outsideDays="hidden";
+  }
 }
