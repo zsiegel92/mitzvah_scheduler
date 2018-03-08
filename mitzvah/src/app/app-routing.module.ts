@@ -7,6 +7,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 
 const routes: Routes = [
   { path: 'form', component: FormComponent },
+  { path: '', component: NotFoundComponent },
   { path: '**', component: NotFoundComponent }
 ];
 

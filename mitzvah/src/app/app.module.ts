@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // <-- NgModel lives here
 import { HttpClientModule }    from '@angular/common/http';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -10,19 +11,24 @@ import { DataService } from './data.service';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageService } from './message.service';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { SchoolSelectorComponent } from './school-selector/school-selector.component';
+import { DatepickerComponent } from './datepicker/datepicker.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FormComponent,
     MessagesComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    SchoolSelectorComponent,
+    DatepickerComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     AppRoutingModule,
     HttpClientModule,
+    NgbModule.forRoot(),
   ],
   providers: [ DataService, MessageService,],
   bootstrap: [AppComponent]
