@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+// import { Hebcal } from '../app.module';
 
 const now = new Date();
 
@@ -29,6 +30,8 @@ export class DatepickerComponent {
   selectToday() {
     this.model = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate()};
   }
+
+
 
   constructor() {
   	this.selectThisWeek();
