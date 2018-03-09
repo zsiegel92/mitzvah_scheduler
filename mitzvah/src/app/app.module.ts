@@ -16,7 +16,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { SchoolSelectorComponent } from './school-selector/school-selector.component';
 import { DatepickerComponent } from './datepicker/datepicker.component';
 
-
+// import * as Hebcal from 'hebcal';
 
 @NgModule({
   declarations: [
