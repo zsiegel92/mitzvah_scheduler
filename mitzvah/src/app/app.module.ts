@@ -15,6 +15,11 @@ import { MessageService } from './message.service';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { SchoolSelectorComponent } from './school-selector/school-selector.component';
 import { DatepickerComponent } from './datepicker/datepicker.component';
+import { FormService } from './form.service';
+import { FormStudentComponent } from './form-student/form-student.component';
+import { FormVenueComponent } from './form-venue/form-venue.component';
+import { FormDateComponent } from './form-date/form-date.component';
+import { FormAccommodationComponent } from './form-accommodation/form-accommodation.component';
 
 // import * as Hebcal from 'hebcal';
 
@@ -25,7 +30,11 @@ import { DatepickerComponent } from './datepicker/datepicker.component';
     MessagesComponent,
     NotFoundComponent,
     SchoolSelectorComponent,
-    DatepickerComponent
+    DatepickerComponent,
+    FormStudentComponent,
+    FormVenueComponent,
+    FormDateComponent,
+    FormAccommodationComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +43,7 @@ import { DatepickerComponent } from './datepicker/datepicker.component';
     HttpClientModule,
     NgbModule.forRoot(),
   ],
-  providers: [ DataService, MessageService,],
+  providers: [ DataService, MessageService, FormService,],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

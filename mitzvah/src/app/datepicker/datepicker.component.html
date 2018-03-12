@@ -1,56 +1,54 @@
-<p>Choose the dates you are unavailable
-	<br>
-<button class="btn btn-sm btn-outline-primary" (click)="push_date()">New date</button>
-</p>
+<button class="btn btn-sm btn-outline-primary" (click)="push_date()" *ngIf="multi">New date</button>
 <br>
-
 <!-- <ngb-datepicker #dp [(ngModel)]="model" outsideDays="hidden" (navigate)="date = $event.next" (select)="j_update()" [markDisabled]="isDisabled"></ngb-datepicker> -->
 <div style="display:flex; flex-flow: row wrap;">
-	<div style="flex:1; flex-basis: 25%;" *ngFor="let mod of models">
-		<div style="float:left;">
-			{{mod.hdate_str}}
-			<br>
-			{{mod.hdate_str_heb}}
-			<br>
-			<ngb-datepicker [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="isDisabled" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
-			<br><br>
-			<button class="btn btn-sm btn-outline-info" (click)="mod.selectThisWeek()">This Saturday</button>
-			<button class="btn btn-sm btn-outline-warning" (click)="pop_date(i)">Remove date</button>
-		</div>
-		<div style="float:left;">
-			<div *ngIf="mod.holidays?.length>0; else elseBlock">
-				<b>Holidays on this day:</b>
-				<ul>
-					<li *ngFor="let holiday of mod.holidays">{{holiday.desc}}</li>
-				</ul>
-			</div>
-			<ng-template #elseBlock>
-				No holidays on this day.
-			</ng-template>
-
-			<!-- <ul>
-				<li>Hebrew Date (Roman) : {{mod.hdate_str}}</li>
-				<li>Hebrew Date : {{mod.hdate_str_heb}}</li>
-				<li>Gregorian Date : {{mod.greg.month + "/" + mod.greg.day + "/" + mod.greg.year}}</li>
-				<li>Number of days in (Hebrew) month : {{mod.hdays_in_month}}</li>
-				<li>Gregorian Date (backconverted): {{mod.hgregorian | date}}</li>
-				<li>Gregorian Date Eve (backconverted) : {{mod.hgregorian_eve | date}} </li>
-			</ul> -->
-		</div>
-	</div>
+   <div style="flex:1; flex-basis: 25%;" *ngFor="let mod of models">
+      <div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
+         <div>
+            <b>{{mod.hdate_str}} -- {{mod.hdate_str_heb}}</b>
+            <br>
+            <ngb-datepicker [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="onlySaturdays ? isNotSaturday : allFalse" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
+            <br><br>
+            <button class="btn btn-sm btn-outline-info" (click)="mod.selectThisWeek()">This Saturday</button>
+            <div *ngIf="multi">
+               <button class="btn btn-sm btn-outline-warning" (click)="pop_date(i)" *ngIf="multi">
+               Remove date
+               </button>
+            </div>
+         </div>
+         <br>
+         <div>
+            <div *ngIf="mod.holidays?.length!=0; else elseBlock">
+               <b>Holidays on this day:</b>
+               <ul>
+                  <li *ngFor="let holiday of mod.holidays">{{holiday.desc}}</li>
+               </ul>
+            </div>
+            <ng-template #elseBlock>
+               <b>No holidays on this day.</b>
+            </ng-template>
+         </div>
+      </div>
+      <!-- <ul>
+         <li>Hebrew Date (Roman) : {{mod.hdate_str}}</li>
+         <li>Hebrew Date : {{mod.hdate_str_heb}}</li>
+         <li>Gregorian Date : {{mod.greg.month + "/" + mod.greg.day + "/" + mod.greg.year}}</li>
+         <li>Number of days in (Hebrew) month : {{mod.hdays_in_month}}</li>
+         <li>Gregorian Date (backconverted): {{mod.hgregorian | date}}</li>
+         <li>Gregorian Date Eve (backconverted) : {{mod.hgregorian_eve | date}} </li>
+         </ul> -->
+   </div>
 </div>
 <hr/>
 <!-- <button class="btn btn-sm btn-outline-primary" (click)="selectThisWeek()">Select This Saturday</button>
-<button class="btn btn-sm btn-outline-primary" (click)="dp.navigateTo()">To current month</button>
-<button class="btn btn-sm btn-outline-primary" (click)="dp.navigateTo({year: 2005, month: 1})">To Jan 2005</button> -->
-<hr/>
-<pre>
-	{{models | json}}
-</pre>
-<pre>minDate : {{minDate | json}}</pre>
-
-<pre>maxDate : {{maxDate | json}}</pre>
-
+   <button class="btn btn-sm btn-outline-primary" (click)="dp.navigateTo()">To current month</button>
+   <button class="btn btn-sm btn-outline-primary" (click)="dp.navigateTo({year: 2005, month: 1})">To Jan 2005</button> -->
+<!-- <hr/>
+   <pre>
+    {{models | json}}
+   </pre>
+   <pre>minDate : {{minDate | json}}</pre>
+   <pre>maxDate : {{maxDate | json}}</pre> -->
 <!-- <pre>Month: {{ date.month }}.{{ date.year }}</pre>
-<pre>Model: {{ model | json }}</pre>
-<pre>jDate: {{jDate | json }}</pre> -->
+   <pre>Model: {{ model | json }}</pre>
+   <pre>jDate: {{jDate | json }}</pre> -->

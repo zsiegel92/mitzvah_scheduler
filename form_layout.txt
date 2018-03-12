@@ -1,0 +1,18 @@
+Components:
+
+form with ngifs
+student
+	email
+	name
+	DOB
+	religious school
+	academic school
+venue
+	venue ranker
+	num guests
+date selection
+	dates unavailable (multidatepicker)
+Accommodation/Additional
+	Twin?
+	Accommodations? None/Other
+	Additional info?
