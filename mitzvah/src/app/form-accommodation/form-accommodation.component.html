@@ -1,25 +1,28 @@
-
-<div class="form-group">
-	<label for="name">Is your child a twin who will be sharing the service with their sibling?
-</label>
-	<form action="">
-	  <input type="radio" name="twin" value=0>No<br>
-	  <input type="radio" name="twin" value=1>Yes<br>
-	</form>
-</div>
-
 Is your child a twin who will be sharing the service with their sibling?
+<br>
+<div class="btn-group btn-group-toggle" ngbRadioGroup name="twin" [(ngModel)]="twin">
+		<label ngbButtonLabel class="btn-primary">
+			<input ngbButton type="radio" [value]="true"> Yes
+		</label>
+		<label ngbButtonLabel class="btn-primary">
+			<input ngbButton type="radio" [value]="false"> No
+		</label>
+</div>
+<br>
 
-<div class="form-group">
-	<label for="name">What special accommodations will your child need for their service?
-</label>
-	<form action="">
-	  <input type="radio" [(ngModel)]="accommodation" value=0>None<br>
-	  <input type="radio" [(ngModel)]="accommodation" value=1>Other<br>
-	</form>
+What special accommodations will your child need for their service?
+<br>
+<div class="btn-group btn-group-toggle" ngbRadioGroup name="accommodation" [(ngModel)]="accommodation">
+		<label ngbButtonLabel class="btn-primary">
+			<input ngbButton type="radio" [value]="false"> None
+		</label>
+		<label ngbButtonLabel class="btn-primary">
+			<input ngbButton type="radio" [value]="true"> Other
+		</label>
 </div>
 
-<div *ngIf="accommodation==1">
+
+<div *ngIf="accommodation">
 	<div class="form-group">
 		<label for="accommodation">Additional accommodation needed</label>
 		<input type="text" [(ngModel)]="accommodation" class="form-control">

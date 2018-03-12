@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-form-accommodation',
@@ -6,7 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./form-accommodation.component.css']
 })
 export class FormAccommodationComponent implements OnInit {
-
+	accommodation: boolean = false;
+	twin: boolean = false;
   constructor() { }
 
   ngOnInit() {
