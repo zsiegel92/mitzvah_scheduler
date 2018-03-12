@@ -45,6 +45,12 @@ export class DoubleDate {
     					"Gregorian Date (backconverted)":this.hgregorian.toString(),
     					"Gregorian Date Eve (backconverted)": this.hgregorian_eve.toString()}
     }
+
+    thirteen_ago(){
+    	this.greg = {year: now.getFullYear()-13, month: now.getMonth()+1, day: now.getDate()};
+    	this.update();
+    }
+
     selectThisWeek() {
       this.greg = {year: now.getFullYear(), month: now.getMonth()+1, day: now.getDate() + 6 - (now.getDay() % 7)};
       this.update();
