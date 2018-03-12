@@ -7,7 +7,6 @@ import { DatepickerComponent } from '../datepicker/datepicker.component';
   styleUrls: ['./form-student.component.css']
 })
 export class FormStudentComponent implements OnInit {
-
   constructor() { }
 
   ngOnInit() {

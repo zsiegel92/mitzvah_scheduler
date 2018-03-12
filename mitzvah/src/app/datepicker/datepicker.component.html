@@ -7,16 +7,16 @@
 			<div>
 				<b>{{mod.hdate_str}} -- {{mod.hdate_str_heb}}</b>
 				<br>
-				<ngb-datepicker (navigate)="date = $event.next" [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="onlySaturdays ? isNotSaturday : allFalse" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
+				<ngb-datepicker #dp="ngbDatepicker" (navigate)="date = $event.next" [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="onlySaturdays ? isNotSaturday : allFalse" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
 				<br><br>
-				<button class="btn btn-sm btn-outline-info" (click)="mod.selectThisWeek()">This Saturday</button>
+				<button class="btn btn-sm btn-outline-info" (click)="mod.selectThisWeek(); dp.navigateTo({ year: mod.greg.year, month: mod.greg.month });">This Saturday</button>
 				<div *ngIf="multi;else elseBlock2">
 					<button class="btn btn-sm btn-outline-warning" (click)="pop_date(i)">
 					Remove date
 					</button>
 				</div>
 				<ng-template #elseBlock2>
-					<button class="btn btn-sm btn-outline-info" (click)="mod.thirteen_ago()">
+					<button class="btn btn-sm btn-outline-info" (click)="mod.thirteen_ago(); dp.navigateTo({ year: mod.greg.year, month: mod.greg.month})">
 						Thirteen Years Ago...
 					</button>
 				</ng-template>
