@@ -17,6 +17,57 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 
 /***/ }),
 
+/***/ "./src/app/DoubleDate.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Hebcal = __webpack_require__("./node_modules/hebcal/src/hebcal.js");
+var now = new Date();
+var DoubleDate = /** @class */ (function () {
+    function DoubleDate() {
+        this.selectThisWeek();
+    }
+    // selfdict: {"Gregorian Date": NgbDateStruct,
+    // 					"Hebrew Date (Roman)": string,
+    // 					"Hebrew Date (Hebrew)": string,
+    // 					"Number of days in (Hebrew) month": number,
+    // 					"Gregorian Date (backconverted)": string,
+    // 					"Gregorian Date Eve (backconverted)": string};
+    DoubleDate.prototype.update = function () {
+        var heb = new Hebcal.HDate(new Date(this.greg.year, this.greg.month - 1, this.greg.day));
+        this.hyear = heb.getFullYear();
+        this.hmonth = heb.getMonth();
+        this.hdate = heb.getDate();
+        this.hday = heb.getDay();
+        this.hdays_in_month = heb.daysInMonth();
+        this.hgregorian = heb.greg();
+        this.hgregorian_eve = heb.gregEve();
+        this.hdate_str = heb.toString();
+        this.hdate_str_heb = heb.toString('h');
+        this.holidays = heb.holidays(); //Try holidays(all)
+        // this.to_dict();
+    };
+    DoubleDate.prototype.to_dict = function () {
+        return { "Gregorian Date": this.greg,
+            "Hebrew Date (Roman)": this.hdate_str,
+            "Hebrew Date (Hebrew)": this.hdate_str_heb,
+            "Number of days in (Hebrew) month": this.hdays_in_month,
+            "Gregorian Date (backconverted)": this.hgregorian.toString(),
+            "Gregorian Date Eve (backconverted)": this.hgregorian_eve.toString() };
+    };
+    DoubleDate.prototype.selectThisWeek = function () {
+        this.greg = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() + 6 - (now.getDay() % 7) };
+        this.update();
+    };
+    return DoubleDate;
+}());
+exports.DoubleDate = DoubleDate;
+
+
+/***/ }),
+
 /***/ "./src/app/app-routing.module.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -252,7 +303,7 @@ module.exports = ""
 /***/ "./src/app/datepicker/datepicker.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<p>Simple datepicker</p>\n<!-- outsideDays=\"hidden\" firstDayOfWeek=\"0\" -->\n<ngb-datepicker #dp [(ngModel)]=\"model\" outsideDays=\"hidden\" (navigate)=\"date = $event.next\" (select)=\"j_update()\" [markDisabled]=\"isDisabled\"></ngb-datepicker>\n\n<hr/>\n\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"selectThisWeek()\">Select This Saturday</button>\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"dp.navigateTo()\">To current month</button>\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"dp.navigateTo({year: 2005, month: 1})\">To Jan 2005</button>\n\n<hr/>\n\n<pre>Month: {{ date.month }}.{{ date.year }}</pre>\n<pre>Model: {{ model | json }}</pre>\n<pre>jDate: {{jDate | json }}</pre>\n"
+module.exports = "<p>Choose the dates you are unavailable\n\t<br>\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"push_date()\">New date</button>\n</p>\n<br>\n\n<!-- <ngb-datepicker #dp [(ngModel)]=\"model\" outsideDays=\"hidden\" (navigate)=\"date = $event.next\" (select)=\"j_update()\" [markDisabled]=\"isDisabled\"></ngb-datepicker> -->\n<div style=\"display:flex; flex-flow: row wrap;\">\n\t<div style=\"flex:1; flex-basis: 25%;\" *ngFor=\"let mod of models\">\n\t\t<div style=\"float:left;\">\n\t\t\t{{mod.hdate_str}}\n\t\t\t<br>\n\t\t\t{{mod.hdate_str_heb}}\n\t\t\t<br>\n\t\t\t<ngb-datepicker [(ngModel)]=\"mod.greg\" outsideDays=\"hidden\" (select)=\"mod.update()\" [markDisabled]=\"isDisabled\" [minDate]=\"minDate\" [maxDate]=\"maxDate\"></ngb-datepicker>\n\t\t\t<br><br>\n\t\t\t<button class=\"btn btn-sm btn-outline-info\" (click)=\"mod.selectThisWeek()\">This Saturday</button>\n\t\t\t<button class=\"btn btn-sm btn-outline-warning\" (click)=\"pop_date(i)\">Remove date</button>\n\t\t</div>\n\t\t<div style=\"float:left;\">\n\t\t\t<div *ngIf=\"mod.holidays?.length>0; else elseBlock\">\n\t\t\t\t<b>Holidays on this day:</b>\n\t\t\t\t<ul>\n\t\t\t\t\t<li *ngFor=\"let holiday of mod.holidays\">{{holiday.desc}}</li>\n\t\t\t\t</ul>\n\t\t\t</div>\n\t\t\t<ng-template #elseBlock>\n\t\t\t\tNo holidays on this day.\n\t\t\t</ng-template>\n\n\t\t\t<!-- <ul>\n\t\t\t\t<li>Hebrew Date (Roman) : {{mod.hdate_str}}</li>\n\t\t\t\t<li>Hebrew Date : {{mod.hdate_str_heb}}</li>\n\t\t\t\t<li>Gregorian Date : {{mod.greg.month + \"/\" + mod.greg.day + \"/\" + mod.greg.year}}</li>\n\t\t\t\t<li>Number of days in (Hebrew) month : {{mod.hdays_in_month}}</li>\n\t\t\t\t<li>Gregorian Date (backconverted): {{mod.hgregorian | date}}</li>\n\t\t\t\t<li>Gregorian Date Eve (backconverted) : {{mod.hgregorian_eve | date}} </li>\n\t\t\t</ul> -->\n\t\t</div>\n\t</div>\n</div>\n<hr/>\n<!-- <button class=\"btn btn-sm btn-outline-primary\" (click)=\"selectThisWeek()\">Select This Saturday</button>\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"dp.navigateTo()\">To current month</button>\n<button class=\"btn btn-sm btn-outline-primary\" (click)=\"dp.navigateTo({year: 2005, month: 1})\">To Jan 2005</button> -->\n<hr/>\n<pre>\n\t{{models | json}}\n</pre>\n<pre>minDate : {{minDate | json}}</pre>\n\n<pre>maxDate : {{maxDate | json}}</pre>\n\n<!-- <pre>Month: {{ date.month }}.{{ date.year }}</pre>\n<pre>Model: {{ model | json }}</pre>\n<pre>jDate: {{jDate | json }}</pre> -->\n"
 
 /***/ }),
 
@@ -272,27 +323,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
+var DoubleDate_1 = __webpack_require__("./src/app/DoubleDate.ts");
 // import { Hebcal } from '../app.module';
-var Hebcal = __webpack_require__("./node_modules/hebcal/src/hebcal.js");
+// import * as Hebcal from 'hebcal';
 var now = new Date();
 var DatepickerComponent = /** @class */ (function () {
     function DatepickerComponent() {
-        this.selectThisWeek();
-        // this.dp.outsideDays="hidden";
+        this.models = [new DoubleDate_1.DoubleDate()];
+        this.maxDate = { year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate() };
+        this.minDate = { year: now.getFullYear() - 15, month: now.getMonth() + 1, day: now.getDate() };
+        // this.push_double_date();
+        // this.selectThisWeek();
     }
-    DatepickerComponent.prototype.selectThisWeek = function () {
-        this.model = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() + 6 - (now.getDay() % 7) };
-        this.j_update();
+    DatepickerComponent.prototype.push_date = function () {
+        this.models.push(new DoubleDate_1.DoubleDate());
     };
+    DatepickerComponent.prototype.pop_date = function (i) {
+        this.models.splice(i, 1);
+    };
+    // selectThisWeek() {
+    //   this.model = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() + 6 - (now.getDay() % 7)};
+    //   this.j_update();
+    // }
+    // j_update() {
+    //   var j_selected = new Hebcal.HDate(new Date(this.model.year, this.model.month, this.model.day));
+    //   this.jDate = {year: j_selected.getFullYear(), month: j_selected.getMonth(), date: j_selected.getDate(), day: j_selected.getDay(), days_in_month: j_selected.daysInMonth(), gregorian: j_selected.greg(), gregorian_eve: j_selected.gregEve(), date_str: j_selected.toString(),date_str_heb: j_selected.toString('h')};
+    // }
     // non-Saturdays are disabled
     DatepickerComponent.prototype.isDisabled = function (a_date) {
         var d = new Date(a_date.year, a_date.month - 1, a_date.day);
         return d.getDay() !== 6;
         // return true;
-    };
-    DatepickerComponent.prototype.j_update = function () {
-        var j_selected = new Hebcal.HDate(new Date(this.model.year, this.model.month, this.model.day));
-        this.jDate = { year: j_selected.getFullYear(), month: j_selected.getMonth(), date: j_selected.getDate(), day: j_selected.getDay(), days_in_month: j_selected.daysInMonth(), gregorian: j_selected.greg(), gregorian_eve: j_selected.gregEve(), date_str: j_selected.toString(), date_str_heb: j_selected.toString('h') };
     };
     DatepickerComponent = __decorate([
         core_1.Component({
@@ -320,7 +381,7 @@ module.exports = ""
 /***/ "./src/app/form/form.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<!-- <h3>Schools</h3>\n<div class=\"grid grid-pad\">\n\t<a *ngFor=\"let school of schools\" class=\"col-1-4\">\n\t\t<div class=\"module school\">\n\t\t\t<h4>{{school.name}}</h4>\n\t\t\t<ul><li>{{school.id}}</li></ul>\n\t\t</div>\n\t</a>\n</div>\n-->\n<h3>Student Information</h3>\n<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah\n\tForms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.\nFor assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>\n<br>\n<br>\n<div style=\"margin:50px;padding:50px;\">\n<div class=\"form-group\">\n\t<label for=\"name\">Email Address</label>\n\t<input type=\"text\" class=\"form-control\" id=\"email\" required>\n</div>\n<br>\n<div class=\"form-group\">\n\t<label for=\"name\">Child's Name</label>\n\t<input type=\"text\" class=\"form-control\" id=\"name\" required>\n</div>\n<br>\n<div class=\"form-group\">\n\t<label for=\"name\">Child's Name</label>\n\t<input type=\"text\" class=\"form-control\" id=\"name\" required>\n</div>\n\n<div class=\"form-group\">\n\t<app-datepicker ></app-datepicker>\n</div>\n\n</div>\n\n\n"
+module.exports = "<!-- <h3>Schools</h3>\n<div class=\"grid grid-pad\">\n\t<a *ngFor=\"let school of schools\" class=\"col-1-4\">\n\t\t<div class=\"module school\">\n\t\t\t<h4>{{school.name}}</h4>\n\t\t\t<ul><li>{{school.id}}</li></ul>\n\t\t</div>\n\t</a>\n</div>\n-->\n<h3>Student Information</h3>\n<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah\n\tForms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.\nFor assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>\n<br>\n<br>\n<div style=\"margin:50px;padding:50px;\">\n<div class=\"form-group\">\n\t<label for=\"name\">Email Address</label>\n\t<input type=\"text\" class=\"form-control\" id=\"email\" required>\n</div>\n<br>\n<div class=\"form-group\">\n\t<label for=\"name\">Child's Name</label>\n\t<input type=\"text\" class=\"form-control\" id=\"name\" required>\n</div>\n<br>\n<div class=\"form-group\">\n\t<label for=\"name\">Child's Name</label>\n\t<input type=\"text\" class=\"form-control\" id=\"name\" required>\n</div>\n\n<!-- TODO - TAKE OUT THIS ngFor -->\n<app-datepicker></app-datepicker>\n\n\n</div>\n\n\n"
 
 /***/ }),
 
@@ -340,17 +401,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
+// import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 var data_service_1 = __webpack_require__("./src/app/data.service.ts");
 var FormComponent = /** @class */ (function () {
+    // pushDate(): void {
+    // 	this.dateStructs.push()
+    // }
     // submitted = false;
     // onSubmit() { this.submitted = true; }
     function FormComponent(dataService) {
         this.dataService = dataService;
     }
-    // schools = SCHOOLS;
-    // getSchools(): void {
-    //   this.schools = this.dataService.getSchools();
-    // }
     FormComponent.prototype.getSchools = function () {
         var _this = this;
         this.dataService.getSchools()

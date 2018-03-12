@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+// import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+
 import { DataService } from '../data.service';
 import { School } from '../school';
-
 import { SchoolSelectorComponent } from '../school-selector/school-selector.component';
 import { DatepickerComponent } from '../datepicker/datepicker.component';
 
@@ -12,19 +13,21 @@ import { DatepickerComponent } from '../datepicker/datepicker.component';
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit {
-	schools: School[];
-	// schools = SCHOOLS;
 
-	// getSchools(): void {
-	//   this.schools = this.dataService.getSchools();
-	// }
+	// dateStructs: NgbDateStruct[] =[];
+
+
+
+	schools: School[];
 
 	getSchools(): void {
 	  this.dataService.getSchools()
 	      .subscribe(schools => this.schools = schools);
 	}
 
-
+	// pushDate(): void {
+	// 	this.dateStructs.push()
+	// }
 	// submitted = false;
 
 	// onSubmit() { this.submitted = true; }
