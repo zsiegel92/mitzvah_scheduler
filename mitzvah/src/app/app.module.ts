@@ -14,7 +14,7 @@ import { MessagesComponent } from './messages/messages.component';
 import { MessageService } from './message.service';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { SchoolSelectorComponent } from './school-selector/school-selector.component';
-import { DatepickerComponent } from './datepicker/datepicker.component';
+// import { DatepickerComponent } from './datepicker/datepicker.component';
 import { FormService } from './form.service';
 import { FormStudentComponent } from './form-student/form-student.component';
 import { FormVenueComponent } from './form-venue/form-venue.component';
@@ -30,7 +30,6 @@ import { FormAccommodationComponent } from './form-accommodation/form-accommodat
     MessagesComponent,
     NotFoundComponent,
     SchoolSelectorComponent,
-    DatepickerComponent,
     FormStudentComponent,
     FormVenueComponent,
     FormDateComponent,

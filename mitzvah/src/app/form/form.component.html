@@ -13,6 +13,9 @@
 	Forms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.
 For assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>
 
+<button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+<button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+
 
 <app-form-student #studentform [hidden]="step!==0"></app-form-student>
 <app-form-venue #venueform [hidden]="step!==1"></app-form-venue>
@@ -21,8 +24,8 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 
 <br>
 
-<button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0">BACK</button>
-<button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3">NEXT</button>
+<button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+<button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
 
 <br>
 

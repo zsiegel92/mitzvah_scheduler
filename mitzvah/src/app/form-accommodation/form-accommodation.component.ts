@@ -9,6 +9,7 @@ import { FormService } from '../form.service';
 })
 export class FormAccommodationComponent implements OnInit {
 	accommodation: boolean = false;
+	accommodation_other: string = '';
 	twin: boolean = false;
 
 	syncForm(){

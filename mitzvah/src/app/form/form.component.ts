@@ -10,7 +10,6 @@ import { FormDateComponent } from '../form-date/form-date.component';
 import { FormAccommodationComponent } from '../form-accommodation/form-accommodation.component';
 
 import { SchoolSelectorComponent } from '../school-selector/school-selector.component';
-import { DatepickerComponent } from '../datepicker/datepicker.component';
 import { FormService } from '../form.service';
 
 @Component({
@@ -28,40 +27,28 @@ export class FormComponent implements OnInit {
 
 		schools: School[];
 		step: number;
-
+		comp;
 
 	getSchools(): void {
 	  this.dataService.getSchools()
 	      .subscribe(schools => this.schools = schools);
 	}
 
-	// back():void{
-	// 	this.syncForm();
-	// 	if (this.step > 0){
-	// 		this.step--;
-	// 	}
-	// 	this.prepForm();
-	// }
-	// forward():void{
-	// 	this.syncForm();
-	// 	if (this.step < 3){
-	// 		this.step++;
-	// 	}
-	// 	this.prepForm();
-	// }
 	move(steps:number):void{
-		this.syncForm();
+		this.comp.syncForm();
 		if ((this.step + steps > -1) && (this.step + steps < 4)){
 			this.step = this.step + steps;
 		}
-		this.prepForm();
-	}
-	syncForm(){
-		this.comps[this.step].syncForm();
+		this.setcomp()
+		this.comp.prepForm();
 	}
 
-	prepForm(){
-		this.comps[this.step].prepForm();
+	invalidform(){
+		return false
+	}
+
+	setcomp(){
+		this.comp = this.comps[this.step];
 	}
 
   constructor(private dataService: DataService,private formService: FormService) {
@@ -70,6 +57,7 @@ export class FormComponent implements OnInit {
 
   ngOnInit() {
   	this.comps = [this.studentForm,this.venueForm,this.dateForm,this.accommodationForm];
+  	this.setcomp();
   	this.getSchools();
   }
 

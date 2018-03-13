@@ -1,4 +1,5 @@
-<div class="container" style="width:50%">
+<div class="container">
+
 	<div class="row">
 		<div class="col">
 			Main Sanctuary
@@ -17,12 +18,13 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
 		<div class="col">
 			Family Minyan
 		</div>
 		<div class="col">
-			<div class="btn-group btn-group-toggle" ngbRadioGroup name="venue2" [(ngModel)] = "model2">
+			<div class="btn-group btn-group-toggle" ngbRadioGroup name="venue2" [(ngModel)]="model2">
 				<label ngbButtonLabel class="btn-primary">
 					<input ngbButton type="radio" [value]="1"> Preferred
 				</label>
@@ -35,6 +37,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
 		<div class="col">
 			Torah in the Round
@@ -53,4 +56,5 @@
 			</div>
 		</div>
 	</div>
+
 </div>

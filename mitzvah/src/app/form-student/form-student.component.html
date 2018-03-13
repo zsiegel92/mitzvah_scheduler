@@ -14,9 +14,35 @@ Date of Birth:
 <br>
 
 
-
-<app-datepicker #dp [multi]="false" [onlySaturdays]="false"></app-datepicker>
-
+<div style="display:flex; flex-flow: row wrap;">
+	<div style="flex:1; flex-basis: 25%;">
+		<div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
+			<div>
+				<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>
+				<br>
+				<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
+				<br><br>
+				<div>
+				<button class="btn btn-sm btn-outline-info" (click)="model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})">
+				Thirteen Years Ago...
+				</button>
+				</div>
+			</div>
+			<br>
+			<div>
+				<div *ngIf="model.holidays?.length!=0; else elseBlock">
+					<b>Holidays on this day:</b>
+					<ul>
+						<li *ngFor="let holiday of model.holidays">{{holiday.desc}}</li>
+					</ul>
+				</div>
+				<ng-template #elseBlock>
+				<b>No holidays on this day.</b>
+				</ng-template>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
