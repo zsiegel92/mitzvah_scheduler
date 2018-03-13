@@ -15,6 +15,8 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 
 <button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
 <button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+<br>
+<br>
 
 
 <app-form-student #studentform [hidden]="step!==0"></app-form-student>
@@ -23,7 +25,7 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 <app-form-accommodation #accommodationform [hidden]="step!==3"></app-form-accommodation>
 
 <br>
-
+<br>
 <button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
 <button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
 
