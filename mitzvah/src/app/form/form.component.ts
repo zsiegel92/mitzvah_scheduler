@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 // import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 
 import { DataService } from '../data.service';
@@ -19,6 +19,12 @@ import { FormService } from '../form.service';
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit {
+		@ViewChild("studentform") studentForm: FormStudentComponent;
+		@ViewChild("venueform") venueForm: FormVenueComponent;
+		@ViewChild("dateform") dateForm: FormDateComponent;
+		@ViewChild("accommodationform") accommodationForm: FormAccommodationComponent;
+
+		comps: any[];
 
 		schools: School[];
 		step: number;
@@ -29,22 +35,41 @@ export class FormComponent implements OnInit {
 	      .subscribe(schools => this.schools = schools);
 	}
 
-	back():void{
-		if (this.step > 1){
-			this.step--;
+	// back():void{
+	// 	this.syncForm();
+	// 	if (this.step > 0){
+	// 		this.step--;
+	// 	}
+	// 	this.prepForm();
+	// }
+	// forward():void{
+	// 	this.syncForm();
+	// 	if (this.step < 3){
+	// 		this.step++;
+	// 	}
+	// 	this.prepForm();
+	// }
+	move(steps:number):void{
+		this.syncForm();
+		if ((this.step + steps > -1) && (this.step + steps < 4)){
+			this.step = this.step + steps;
 		}
+		this.prepForm();
 	}
-	forward():void{
-		if (this.step < 4){
-			this.step++;
-		}
+	syncForm(){
+		this.comps[this.step].syncForm();
+	}
+
+	prepForm(){
+		this.comps[this.step].prepForm();
 	}
 
   constructor(private dataService: DataService,private formService: FormService) {
-  	this.step=1;
+  	this.step=0;
   }
 
   ngOnInit() {
+  	this.comps = [this.studentForm,this.venueForm,this.dateForm,this.accommodationForm];
   	this.getSchools();
   }
 

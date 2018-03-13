@@ -3,7 +3,7 @@ import { DoubleDate } from './DoubleDate';
 
 @Injectable()
 export class FormService {
-	birthday: DoubleDate;
+	public birthday: DoubleDate;
 	avoid_days: DoubleDate[];
 
   constructor() { }

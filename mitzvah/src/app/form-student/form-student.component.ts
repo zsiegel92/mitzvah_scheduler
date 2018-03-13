@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { DatepickerComponent } from '../datepicker/datepicker.component';
+import { FormService } from '../form.service';
+
 
 @Component({
   selector: 'app-form-student',
@@ -7,7 +9,16 @@ import { DatepickerComponent } from '../datepicker/datepicker.component';
   styleUrls: ['./form-student.component.css']
 })
 export class FormStudentComponent implements OnInit {
-  constructor() { }
+	@ViewChild("dp") dp: DatepickerComponent;
+
+	syncForm(){
+		this.formService.birthday=this.dp.getModels()[0];
+	}
+	prepForm(){
+
+	}
+
+  constructor(private formService: FormService) {}
 
   ngOnInit() {
   }

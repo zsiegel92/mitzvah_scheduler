@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormService } from '../form.service';
 
 @Component({
   selector: 'app-form-venue',
@@ -10,6 +11,14 @@ export class FormVenueComponent implements OnInit {
 	model1 = 0;
 	model2 = 0;
 	model3 = 0;
+
+	syncForm(){
+
+	}
+	prepForm(){
+
+	}
+
   constructor() { }
 
   ngOnInit() {

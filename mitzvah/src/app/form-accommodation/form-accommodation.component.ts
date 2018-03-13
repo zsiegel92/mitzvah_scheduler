@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormService } from '../form.service';
 
 @Component({
   selector: 'app-form-accommodation',
@@ -9,6 +10,14 @@ import { FormsModule } from '@angular/forms';
 export class FormAccommodationComponent implements OnInit {
 	accommodation: boolean = false;
 	twin: boolean = false;
+
+	syncForm(){
+
+	}
+	prepForm(){
+
+	}
+
   constructor() { }
 
   ngOnInit() {

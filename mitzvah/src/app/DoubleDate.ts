@@ -22,6 +22,9 @@ export class DoubleDate {
     // 					"Gregorian Date (backconverted)": string,
     // 					"Gregorian Date Eve (backconverted)": string};
 
+    getGreg(){
+    	return this.greg;
+    }
     update() {
       var heb = new Hebcal.HDate(new Date(this.greg.year, this.greg.month-1, this.greg.day));
       this.hyear = heb.getFullYear();
@@ -35,6 +38,7 @@ export class DoubleDate {
       this.hdate_str_heb= heb.toString('h');
       this.holidays= heb.holidays();  //Try holidays(all)
       // this.to_dict();
+
     }
 
     to_dict(){
@@ -47,9 +51,18 @@ export class DoubleDate {
     }
 
     thirteen_ago(){
-    	this.greg = {year: now.getFullYear()-13, month: now.getMonth()+1, day: now.getDate()};
+    	this.greg = {year: now.getFullYear()-13,month: now.getMonth()+1,day:now.getDate()}
     	this.update();
     }
+
+    //"If any values are out of range, e.g. the 31st of Nisan, convert them to proper values, i.e. 1st of Iyyar."
+    thirteen_from_h(gdate: NgbDateStruct){
+    	var heb = new Hebcal.HDate(new Date(gdate.year, gdate.month-1, gdate.day));
+    	var future = new Hebcal.HDate(heb.getDate(),heb.getMonth(),heb.getFullYear() + 13).onOrAfter(6).greg();
+    	this.greg={year: future.getFullYear(),month: future.getMonth()+1,day:future.getDate()}
+    	this.update();
+    }
+
 
     selectThisWeek() {
       this.greg = {year: now.getFullYear(), month: now.getMonth()+1, day: now.getDate() + 6 - (now.getDay() % 7)};
