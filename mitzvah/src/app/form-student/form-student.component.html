@@ -8,36 +8,13 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 <div class="form-group">
 	<label for="name">Email Address</label>
 	<!-- <input type="text" class="form-control" id="email" required> -->
-	<input type="email" class="form-control" id="email" email>
+	<input type="email" class="form-control" [(ngModel)]="formService.entry.email" email>
 </div>
 <br>
 <div class="form-group">
 	<label for="name">Child's Name</label>
-	<input type="text" class="form-control" id="name" required>
+	<input type="text" class="form-control" [(ngModel)]="formService.entry.childName" required>
 </div>
-
-<!--
-<br>
-
-<div class="form-group">
-	<label for="name">Religious School</label>
-	<input type="text" class="form-control" id="school-religious" required>
-</div>
-
- -->
-
-<!-- <br>
-
- <h3>Schools</h3>
-<div class="grid grid-pad">
-	<a *ngFor="let school of schools" class="col-1-4">
-		<div class="module school">
-			<h4>{{school.name}}</h4>
-			<ul><li>{{school.id}}</li></ul>
-		</div>
-	</a>
-</div>
- -->
 
 <br>
 
@@ -114,7 +91,5 @@ Date of Birth:
 		</div>
 	</div>
 </div>
-
-
 
 

@@ -23,8 +23,8 @@ export class FormStudentComponent implements OnInit {
 	otherSchool: School;
 	otherHebSchool: School;
 
-	model: DoubleDate;
 
+	model: DoubleDate;
 	maxDate: NgbDateStruct;
 	minDate: NgbDateStruct;
 
@@ -40,7 +40,14 @@ export class FormStudentComponent implements OnInit {
 
 	syncForm(){
 		this.formService.birthday=this.model;
+		this.formService.entry.school = this.selectedSchool.name;
+		this.formService.entry.schoolId = this.selectedSchool.id;
+		this.formService.entry.hebSchool = this.selectedHebSchool.name;
+		this.formService.entry.hebSchoolId = this.selectedHebSchool.id;
+		this.formService.entry.DOB = this.model.hgregorian;
 	}
+
+
 	prepForm(){
 	}
 
