@@ -1,4 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
-/*@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-@import "../node_modules/font-awesome/css/font-awesome.min.css";
+
+/* everywhere else */
+/** {
+  font-family: Arial, Helvetica, sans-serif;
+}
 */
+
+h1 {
+  color: #369;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 250%;
+}
+h2, h3 {
+  color: #444;
+  font-family: Arial, Helvetica, sans-serif;
+  /*font-weight: lighter;*/
+}
+input[text], button {
+  color: #888;
+  font-family: Cambria, Georgia;
+}
+body {
+  margin: 2em;
+  background-color: #e0ddd0;
+  color: #4a567a;
+}
+ngb-datepicker {
+	background-color: #faf9f5;
+}
+
+.form-component {
+	background-color: #f8f7f0;
+	border-radius: 25px;
+	padding: 25px;
+}

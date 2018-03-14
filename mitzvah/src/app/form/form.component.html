@@ -1,38 +1,20 @@
-<!-- <h3>Schools</h3>
-<div class="grid grid-pad">
-	<a *ngFor="let school of schools" class="col-1-4">
-		<div class="module school">
-			<h4>{{school.name}}</h4>
-			<ul><li>{{school.id}}</li></ul>
-		</div>
-	</a>
+<div class="form-component">
+	<br>
+	<button class="btn btn-secondary btn-lg" style="margin-left:5em" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+	<button class="btn btn-secondary btn-lg" style="margin-left:2em" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+	<br>
+	<br>
+	<app-form-student #studentform [hidden]="step!==0"></app-form-student>
+	<app-form-venue #venueform [hidden]="step!==1"></app-form-venue>
+	<app-form-date #dateform [hidden]="step!==2"></app-form-date>
+	<app-form-accommodation #accommodationform [hidden]="step!==3"></app-form-accommodation>
+	<br>
+	<br>
+	<button class="btn btn-secondary btn-lg" style="margin-left:5em" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+	<button class="btn btn-secondary btn-lg" style="margin-left:2em" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+	<br>
+	<br>
+	<p><ngb-progressbar type="success" [value]="step*25"></ngb-progressbar></p>
+	<br>
+	<br>
 </div>
--->
-<h3>Student Information</h3>
-<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah
-	Forms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.
-For assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>
-
-<button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
-<button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
-<br>
-<br>
-
-
-<app-form-student #studentform [hidden]="step!==0"></app-form-student>
-<app-form-venue #venueform [hidden]="step!==1"></app-form-venue>
-<app-form-date #dateform [hidden]="step!==2"></app-form-date>
-<app-form-accommodation #accommodationform [hidden]="step!==3"></app-form-accommodation>
-
-<br>
-<br>
-<button class="btn btn-secondary btn-lg active" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
-<button class="btn btn-secondary btn-lg active" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
-
-<br>
-
-
-<!-- <app-datepicker></app-datepicker> -->
-
-
-

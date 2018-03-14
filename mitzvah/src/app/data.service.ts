@@ -17,6 +17,7 @@ const httpOptions = {
 export class DataService {
 
 	private schoolsURL = 'api/schools';  // URL to web api
+	private hebSchoolsURL = 'api/hebschools';  // URL to web api
 
 	/** GET schools from the server */
 	getSchools (): Observable<School[]> {
@@ -28,6 +29,16 @@ export class DataService {
 	  	      );
 	}
 
+	/** GET schools from the server */
+	getHebSchools (): Observable<School[]> {
+		this.messageService.add('DataService: fetched hebrew schools');
+	  return this.http.get<School[]>(this.hebSchoolsURL)
+	  	.pipe(
+	  	      tap(schools => this.log(`fetched hebrew schools`)),
+	  	      catchError(this.handleError('getHebSchools',[]))
+	  	      );
+	}
+
 	/** GET school by id. Will 404 if id not found */
 	getSchool(id: number): Observable<School> {
 	  const url = `${this.schoolsURL}/id/${id}`;
@@ -36,6 +47,16 @@ export class DataService {
 	    catchError(this.handleError<School>(`getSchool id=${id}`))
 	  );
 	}
+
+	/** GET school by id. Will 404 if id not found */
+	getHebSchool(id: number): Observable<School> {
+	  const url = `${this.hebSchoolsURL}/id/${id}`;
+	  return this.http.get<School>(url).pipe(
+	    tap(_ => this.log(`fetched hebrew school id=${id}`)),
+	    catchError(this.handleError<School>(`getHebSchool id=${id}`))
+	  );
+	}
+
 
 	/** POST: add a new school to the server */
 	addSchool (school: School): Observable<School> {

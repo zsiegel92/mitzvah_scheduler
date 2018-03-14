@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 // import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 
 import { DataService } from '../data.service';
-import { School } from '../school';
 
 import { FormStudentComponent } from '../form-student/form-student.component';
 import { FormVenueComponent } from '../form-venue/form-venue.component';
@@ -25,14 +24,9 @@ export class FormComponent implements OnInit {
 
 		comps: any[];
 
-		schools: School[];
 		step: number;
 		comp;
 
-	getSchools(): void {
-	  this.dataService.getSchools()
-	      .subscribe(schools => this.schools = schools);
-	}
 
 	move(steps:number):void{
 		this.comp.syncForm();
@@ -58,7 +52,6 @@ export class FormComponent implements OnInit {
   ngOnInit() {
   	this.comps = [this.studentForm,this.venueForm,this.dateForm,this.accommodationForm];
   	this.setcomp();
-  	this.getSchools();
   }
 
 }

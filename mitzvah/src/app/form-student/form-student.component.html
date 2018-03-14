@@ -1,3 +1,9 @@
+<h3>Student Information</h3>
+<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah
+	Forms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.
+For assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>
+
+
 <div style="margin:50px;padding:50px;">
 <div class="form-group">
 	<label for="name">Email Address</label>
@@ -9,11 +15,76 @@
 	<label for="name">Child's Name</label>
 	<input type="text" class="form-control" id="name" required>
 </div>
+
+<!--
+<br>
+
+<div class="form-group">
+	<label for="name">Religious School</label>
+	<input type="text" class="form-control" id="school-religious" required>
+</div>
+
+ -->
+
+<!-- <br>
+
+ <h3>Schools</h3>
+<div class="grid grid-pad">
+	<a *ngFor="let school of schools" class="col-1-4">
+		<div class="module school">
+			<h4>{{school.name}}</h4>
+			<ul><li>{{school.id}}</li></ul>
+		</div>
+	</a>
+</div>
+ -->
+
+<br>
+
+<div class="form-group" >
+		<label for="ac_school">Academic School</label>
+		<div *ngIf="schools?.length">
+			<div *ngFor="let school of schools">
+				<label>
+					<input  name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="school">{{school.name}}
+				</label>
+				<br>
+			</div>
+			<label>
+				<input name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="otherSchool"> Other
+			</label>
+		</div>
+
+		<div *ngIf="!schools || schools.length==0 || selectedSchool==otherSchool">
+			<input placeholder="Enter academic school name" name="otherSchoolName" type="text" class="form-control" [(ngModel)]="otherSchool.name" >
+		</div>
+</div>
+
+<br>
+
+<div class="form-group" >
+		<label for="heb_school">Religious School</label>
+		<div *ngIf="hebSchools?.length">
+			<div *ngFor="let school of hebSchools">
+				<label>
+					<input  name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="school">{{school.name}}
+				</label>
+				<br>
+			</div>
+			<label>
+				<input name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="otherHebSchool"> Other
+			</label>
+		</div>
+
+		<div *ngIf="!hebSchools || hebSchools.length==0 || hebSchools==otherSchool">
+			<input placeholder="Enter religious school name" name="otherHebSchoolName" type="text" class="form-control" [(ngModel)]="otherHebSchool.name" >
+		</div>
+</div>
+
+
 <br>
 Date of Birth:
 <br>
-
-
 <div style="display:flex; flex-flow: row wrap;">
 	<div style="flex:1; flex-basis: 25%;">
 		<div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
@@ -47,12 +118,3 @@ Date of Birth:
 
 
 
-
-<div class="form-group">
-	<label for="name">Religious School</label>
-	<input type="text" class="form-control" id="school-religious" required>
-</div>
-<div class="form-group">
-	<label for="name">Academic School</label>
-	<input type="text" class="form-control" id="school-academic" required>
-</div>

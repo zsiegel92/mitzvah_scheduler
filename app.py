@@ -2,7 +2,7 @@ from flask import Flask,jsonify
 import os
 
 from database import db
-from models import School
+from models import School, HebSchool
 
 app = Flask(__name__,static_folder='mitzvah/static')
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -34,7 +34,30 @@ def get_schools():
 	if len(schools)>0:
 		return jsonify(pre_dict(School.query.all())),200
 	else:
-		return jsonify(['no schools']),200
+		return jsonify([]),200
+
+
+
+@app.route("/api/hebschools/")
+def get_hebschools():
+	schools = HebSchool.query.all()
+	if len(schools)>0:
+		return jsonify(pre_dict(HebSchool.query.all())),200
+	else:
+		return jsonify([]),200
+
+
+
+
+@app.route("/api/hebschools/id/<id>")
+def get_hebschool(id):
+	school = HebSchool.query.filter_by(id=id).first()
+	if school is not None:
+		return jsonify(school.to_dict()),200
+	else:
+		return jsonify(['no hebrew schools with that id']),200
+
+
 @app.route("/api/schools/id/<id>")
 def get_school(id):
 	school = School.query.filter_by(id=id).first()
@@ -47,6 +70,9 @@ def get_school(id):
 def add_school():
 	pass
 
+@app.route("/api/hebschools/add")
+def add_hebschool():
+	pass
 
 # # error handlers
 # @app.errorhandler(404)
