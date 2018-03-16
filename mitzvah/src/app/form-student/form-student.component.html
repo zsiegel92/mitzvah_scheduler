@@ -4,21 +4,19 @@
 For assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>
 
 
-<div style="margin:50px;padding:50px;">
-<div class="form-group">
-	<label for="name">Email Address</label>
-	<!-- <input type="text" class="form-control" id="email" required> -->
-	<input type="email" class="form-control" [(ngModel)]="formService.entry.email" email>
-</div>
-<br>
-<div class="form-group">
-	<label for="name">Child's Name</label>
-	<input type="text" class="form-control" [(ngModel)]="formService.entry.childName" required>
-</div>
-
-<br>
-
-<div class="form-group" >
+<div class = "container" >
+	<div class="form-group">
+		<label for="name">Email Address</label>
+		<!-- <input type="text" class="form-control" id="email" required> -->
+		<input type="email" class="form-control" [(ngModel)]="formService.entry.email" email>
+	</div>
+	<br>
+	<div class="form-group">
+		<label for="name">Child's Name</label>
+		<input type="text" class="form-control" [(ngModel)]="formService.entry.childName" required>
+	</div>
+	<br>
+	<div class="form-group" >
 		<label for="ac_school">Academic School</label>
 		<div *ngIf="schools?.length">
 			<div *ngFor="let school of schools">
@@ -31,15 +29,12 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				<input name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="otherSchool"> Other
 			</label>
 		</div>
-
 		<div *ngIf="!schools || schools.length==0 || selectedSchool==otherSchool">
 			<input placeholder="Enter academic school name" name="otherSchoolName" type="text" class="form-control" [(ngModel)]="otherSchool.name" >
 		</div>
-</div>
-
-<br>
-
-<div class="form-group" >
+	</div>
+	<br>
+	<div class="form-group" >
 		<label for="heb_school">Religious School</label>
 		<div *ngIf="hebSchools?.length">
 			<div *ngFor="let school of hebSchools">
@@ -52,44 +47,40 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				<input name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="otherHebSchool"> Other
 			</label>
 		</div>
-
 		<div *ngIf="!hebSchools || hebSchools.length==0 || hebSchools==otherSchool">
 			<input placeholder="Enter religious school name" name="otherHebSchoolName" type="text" class="form-control" [(ngModel)]="otherHebSchool.name" >
 		</div>
-</div>
-
-
-<br>
-Date of Birth:
-<br>
-<div style="display:flex; flex-flow: row wrap;">
-	<div style="flex:1; flex-basis: 25%;">
-		<div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
-			<div>
-				<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>
-				<br>
-				<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
-				<br><br>
+	</div>
+	<br>
+	Date of Birth:
+	<br>
+	<div style="display:flex; flex-flow: row wrap;">
+		<div style="flex:1; flex-basis: 25%;">
+			<div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
 				<div>
-				<button class="btn btn-sm btn-outline-info" (click)="model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})">
-				Thirteen Years Ago...
-				</button>
+					<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>
+					<br>
+					<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate" [startDate]="model.getGreg()"></ngb-datepicker>
+					<br><br>
+					<div>
+						<button class="btn btn-sm btn-outline-info" (click)="model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})">
+						Thirteen Years Ago...
+						</button>
+					</div>
 				</div>
-			</div>
-			<br>
-			<div>
-				<div *ngIf="model.holidays?.length!=0; else elseBlock">
-					<b>Holidays on this day:</b>
-					<ul>
-						<li *ngFor="let holiday of model.holidays">{{holiday.desc}}</li>
-					</ul>
+				<br>
+				<div>
+					<div *ngIf="model.holidays?.length!=0; else elseBlock">
+						<b>Holidays on this day:</b>
+						<ul>
+							<li *ngFor="let holiday of model.holidays">{{holiday.desc}}</li>
+						</ul>
+					</div>
+					<ng-template #elseBlock>
+					<b>No holidays on this day.</b>
+					</ng-template>
 				</div>
-				<ng-template #elseBlock>
-				<b>No holidays on this day.</b>
-				</ng-template>
 			</div>
 		</div>
 	</div>
 </div>
-
-

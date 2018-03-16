@@ -81,7 +81,7 @@ module.exports = "/*!\n *  Font Awesome 4.7.0 by @davegandy - http://fontawesome
 /***/ "./node_modules/raw-loader/index.js!./node_modules/postcss-loader/lib/index.js??embedded!./src/styles.css":
 /***/ (function(module, exports) {
 
-module.exports = "/* You can add global styles to this file, and also import other style files */\n\n/* everywhere else */\n\n/** {\n  font-family: Arial, Helvetica, sans-serif;\n}\n*/\n\nh1 {\n  color: #369;\n  font-family: Arial, Helvetica, sans-serif;\n  font-size: 250%;\n}\n\nh2, h3 {\n  color: #444;\n  font-family: Arial, Helvetica, sans-serif;\n  /*font-weight: lighter;*/\n}\n\ninput[text], button {\n  color: #888;\n  font-family: Cambria, Georgia;\n}\n\nbody {\n  margin: 2em;\n  background-color: #e0ddd0;\n  color: #4a567a;\n}\n\nngb-datepicker {\n\tbackground-color: #faf9f5;\n}\n\n.form-component {\n\tbackground-color: #f8f7f0;\n\tborder-radius: 25px;\n\tpadding: 25px;\n}\n"
+module.exports = "/* You can add global styles to this file, and also import other style files */\n\n/* everywhere else */\n\n/** {\n  font-family: Arial, Helvetica, sans-serif;\n}\n*/\n\nh1 {\n  color: #369;\n  font-family: Arial, Helvetica, sans-serif;\n  font-size: 250%;\n}\n\nh2, h3 {\n  color: #444;\n  font-family: Arial, Helvetica, sans-serif;\n  /*font-weight: lighter;*/\n}\n\ninput[text], button {\n  color: #888;\n  font-family: Cambria, Georgia;\n}\n\nbody {\n  margin: 2em;\n  background-color: #e0ddd0;\n  color: #4a567a;\n}\n\nngb-datepicker {\n\tbackground-color: #faf9f5;\n}\n\n.form-component {\n\tbackground-color: #f8f7f0;\n\tborder-radius: 25px;\n\tpadding: 10px;\n}\n\n@media screen and (max-width: 400) {\n\t.form-component {\n\t\tpadding: 0px;\n\t\tborder-radius: 0px;\n\t}\n\n}\n"
 
 /***/ }),
 

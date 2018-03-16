@@ -24,6 +24,7 @@ export class FormStudentComponent implements OnInit {
 	otherHebSchool: School;
 
 
+
 	model: DoubleDate;
 	maxDate: NgbDateStruct;
 	minDate: NgbDateStruct;
@@ -62,6 +63,7 @@ export class FormStudentComponent implements OnInit {
 
   ngOnInit() {
   	this.model = new DoubleDate();
+  	this.model.thirteen_ago();
   	this.getSchools();
   	// this.schools=[];
   	this.getHebSchools();

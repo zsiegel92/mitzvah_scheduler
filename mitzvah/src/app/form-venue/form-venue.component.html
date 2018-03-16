@@ -1,60 +1,27 @@
-<div class="container">
-
-	<div class="row">
-		<div class="col">
-			Main Sanctuary
-		</div>
-		<div class="col">
-			<div class="btn-group btn-group-toggle" ngbRadioGroup name="venue1" [(ngModel)]="model1">
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="1"> Preferred
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="0"> No preference
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="-1"> Would not like this venue
-				</label>
+<h3>Venue Information</h3>
+<table>
+	<tr>
+		<th></th>
+		<th>Strongly Prefer</th>
+		<th>Indifferent</th>
+		<th>Would not like this venue</th>
+	</tr>
+	<tr *ngFor="let venue of models">
+		<th>{{venue.name}}</th>
+		<td (click)="venue.value=1">
+			<div class="form-check">
+				<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="1"></label>
 			</div>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col">
-			Family Minyan
-		</div>
-		<div class="col">
-			<div class="btn-group btn-group-toggle" ngbRadioGroup name="venue2" [(ngModel)]="model2">
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="1"> Preferred
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="0"> No preference
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="-1"> Would not like this venue
-				</label>
+		</td>
+		<td (click)="venue.value=0">
+			<div class="form-check">
+				<label class="radio-inline"><input type="radio"  name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="0"></label>
 			</div>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col">
-			Torah in the Round
-		</div>
-		<div class="col">
-			<div class="btn-group btn-group-toggle" ngbRadioGroup name="venue3" [(ngModel)]="model3">
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="1"> Preferred
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="0"> No preference
-				</label>
-				<label ngbButtonLabel class="btn-primary">
-					<input ngbButton type="radio" [value]="-1"> Would not like this venue
-				</label>
+		</td>
+		<td (click)="venue.value=-1">
+			<div class="form-check">
+				<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="-1"></label>
 			</div>
-		</div>
-	</div>
-
-</div>
+		</td>
+	</tr>
+</table>

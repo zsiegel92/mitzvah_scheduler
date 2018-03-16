@@ -63,6 +63,15 @@ export class DoubleDate {
     	this.update();
     }
 
+    copy_dd(other: DoubleDate){
+    	this.greg={year: other.greg.year,month: other.greg.month,day:other.greg.day}
+    	this.update();
+    }
+
+    copy_ngb(other: NgbDateStruct){
+    	this.greg={year: other.year,month: other.month,day:other.day}
+    	this.update();
+    }
 
     selectThisWeek() {
       this.greg = {year: now.getFullYear(), month: now.getMonth()+1, day: now.getDate() + 6 - (now.getDay() % 7)};

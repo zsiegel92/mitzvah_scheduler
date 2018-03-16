@@ -13,13 +13,15 @@ export class FormAccommodationComponent implements OnInit {
 	twin: boolean = false;
 
 	syncForm(){
-
+		this.formService.entry.accommodation = this.accommodation;
+		this.formService.entry.accommodation_other = this.accommodation_other;
+		this.formService.entry.twin = this.twin;
 	}
 	prepForm(){
 
 	}
 
-  constructor() { }
+  constructor(private formService: FormService) { }
 
   ngOnInit() {
   }

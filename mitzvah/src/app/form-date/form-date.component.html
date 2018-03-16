@@ -1,13 +1,19 @@
-<h3>Please select any dates you know will not work for your child's B'nai Mitzvah</h3>
-<button class="btn btn-sm btn-outline-primary" (click)="push_date()">{{models?.length==0 ? "I will be unavailable on..." : "I will also be unavailable on..."}}</button>
+<h3>Date Requirements</h3>
+
+
+<h4>Please select any dates you know will not work for your child's B'nai Mitzvah</h4>
+
+<button class="btn btn-sm btn-outline-primary" (click)="push_date();">{{models?.length==0 ? "I will be unavailable on..." : "I will also be unavailable on..."}}</button>
 <br>
+
+
 <div style="display:flex; flex-flow: row wrap;">
 	<div style="flex:1; flex-basis: 25%;" *ngFor="let mod of models; index as i;">
 		<div style="display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;">
 			<div>
 				<b>{{mod.hdate_str}} -- {{mod.hdate_str_heb}}</b>
 				<br>
-				<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="isNotSaturday" [minDate]="minDate" [maxDate]="maxDate"></ngb-datepicker>
+				<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="isNotSaturday" [minDate]="minDate" [maxDate]="maxDate" [startDate]="mod.getGreg()"></ngb-datepicker>
 				<br><br>
 				<div *ngIf="have_birthday==true">
 					<button class="btn btn-sm btn-outline-info" (click)="mod.thirteen_from_h(birthday); sync(dp,mod.greg);">

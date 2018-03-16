@@ -1,7 +1,7 @@
 <div class="form-component">
 	<br>
-	<button class="btn btn-secondary btn-lg" style="margin-left:5em" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
-	<button class="btn btn-secondary btn-lg" style="margin-left:2em" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+	<button class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+	<button class="btn btn-secondary btn-lg forward" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
 	<br>
 	<br>
 	<app-form-student #studentform [hidden]="step!==0"></app-form-student>
@@ -10,8 +10,8 @@
 	<app-form-accommodation #accommodationform [hidden]="step!==3"></app-form-accommodation>
 	<br>
 	<br>
-	<button class="btn btn-secondary btn-lg" style="margin-left:5em" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
-	<button class="btn btn-secondary btn-lg" style="margin-left:2em" (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
+	<button class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0 || invalidform()">BACK</button>
+	<button class="btn btn-secondary btn-lg forward"  (click)="move(1)" [disabled]="step===3 || invalidform()">NEXT</button>
 	<br>
 	<br>
 	<p><ngb-progressbar type="success" [value]="step*25"></ngb-progressbar></p>

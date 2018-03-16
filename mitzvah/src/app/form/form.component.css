@@ -1,0 +1,26 @@
+button.back {
+	margin-left:3em
+}
+
+button.forward {
+	margin-left:2em
+}
+
+@media screen and (max-width: 800px) {
+	button.back {
+		margin-left:0em
+	}
+
+
+	button.forward {
+		margin-left:0em
+	}
+
+  .back,.forward {
+    padding:2px 4px;
+    font-size:85%;
+    line-height: 1.5;
+  }
+
+
+}

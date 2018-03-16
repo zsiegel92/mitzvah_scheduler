@@ -32,5 +32,13 @@ ngb-datepicker {
 .form-component {
 	background-color: #f8f7f0;
 	border-radius: 25px;
-	padding: 25px;
+	padding: 10px;
+}
+
+@media screen and (max-width: 400) {
+	.form-component {
+		padding: 0px;
+		border-radius: 0px;
+	}
+
 }

@@ -1,3 +1,5 @@
+<h3>Additional Information</h3>
+
 Is your child a twin who will be sharing the service with their sibling?
 <br>
 <div class="btn-group btn-group-toggle" ngbRadioGroup name="twin" [(ngModel)]="twin">
@@ -28,3 +30,10 @@ What special accommodations will your child need for their service?
 		<input type="text" [(ngModel)]="accommodation_other" class="form-control">
 	</div>
 </div>
+
+<br>
+accommodation: {{accommodation}}
+<br>
+accommodation_other: {{accommodation_other}}
+<br>
+twin: {{twin}}
