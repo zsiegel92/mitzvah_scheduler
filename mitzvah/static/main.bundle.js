@@ -471,8 +471,8 @@ var FormDateComponent = /** @class */ (function () {
         // @ViewChildren("dp") dps: QueryList<any>
         this.birthday = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
         this.have_birthday = false;
-        this.maxDate = { year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate() };
-        this.minDate = { year: now.getFullYear() - 15, month: now.getMonth() + 1, day: now.getDate() };
+        this.maxDate = { year: now.getFullYear() + 2, month: now.getMonth() + 1, day: now.getDate() };
+        this.minDate = { year: now.getFullYear() - 1, month: now.getMonth() + 1, day: now.getDate() };
     }
     // dps_info(){
     // 	// this.messageService.add('new DP: ' + dd.hgregorian);
