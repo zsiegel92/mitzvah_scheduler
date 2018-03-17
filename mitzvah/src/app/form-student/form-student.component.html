@@ -60,7 +60,7 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				<div>
 					<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>
 					<br>
-					<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate" [startDate]="model.getGreg()"></ngb-datepicker>
+					<ngb-datepicker #dp [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate" [startDate]="model.getGreg()"></ngb-datepicker>
 					<br><br>
 					<div>
 						<button class="btn btn-sm btn-outline-info" (click)="model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})">

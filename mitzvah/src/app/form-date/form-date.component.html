@@ -13,7 +13,7 @@
 			<div>
 				<b>{{mod.hdate_str}} -- {{mod.hdate_str_heb}}</b>
 				<br>
-				<ngb-datepicker #dp (navigate)="date = $event.next" [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="isNotSaturday" [minDate]="minDate" [maxDate]="maxDate" [startDate]="mod.getGreg()"></ngb-datepicker>
+				<ngb-datepicker #dp [(ngModel)]="mod.greg" outsideDays="hidden" (select)="mod.update()" [markDisabled]="isNotSaturday" [minDate]="minDate" [maxDate]="maxDate" [startDate]="mod.getGreg()"></ngb-datepicker>
 				<br><br>
 				<div *ngIf="have_birthday==true">
 					<button class="btn btn-sm btn-outline-info" (click)="mod.thirteen_from_h(birthday); sync(dp,mod.greg);">

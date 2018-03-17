@@ -48,8 +48,8 @@ export class FormStudentComponent implements OnInit {
 		this.get_all_schools();
 	}
 
-  constructor(private formService: FormService,private dataService: DataService) {
-  	this.maxDate = {year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate()};
+  constructor(public formService: FormService,private dataService: DataService) {
+    this.maxDate = {year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate()};
   	this.minDate = {year: now.getFullYear() - 15, month: now.getMonth() + 1, day: now.getDate()};
   	this.otherSchool = new School();
   	this.otherHebSchool = new School();
