@@ -18,6 +18,7 @@ export class FormStudentComponent implements OnInit {
 
 	schools: School[];
 	hebSchools: School[];
+	all_schools: {schools: School[], hebSchools: School[]};
 	selectedSchool: School;
 	selectedHebSchool: School;
 	otherSchool: School;
@@ -29,16 +30,10 @@ export class FormStudentComponent implements OnInit {
 	maxDate: NgbDateStruct;
 	minDate: NgbDateStruct;
 
-	getSchools(): void {
-	  this.dataService.getSchools()
-	      .subscribe(schs => this.schools = schs);
-	}
 
-	getHebSchools(): void {
-	  this.dataService.getHebSchools()
-	      .subscribe(schs => this.hebSchools = schs);
+	get_all_schools(){
+		this.all_schools = this.formService.all_schools;
 	}
-
 	syncForm(){
 		this.formService.birthday=this.model;
 		this.formService.entry.school = this.selectedSchool.name;
@@ -50,6 +45,7 @@ export class FormStudentComponent implements OnInit {
 
 
 	prepForm(){
+		this.get_all_schools();
 	}
 
   constructor(private formService: FormService,private dataService: DataService) {
@@ -64,9 +60,6 @@ export class FormStudentComponent implements OnInit {
   ngOnInit() {
   	this.model = new DoubleDate();
   	this.model.thirteen_ago();
-  	this.getSchools();
-  	// this.schools=[];
-  	this.getHebSchools();
   }
 
 }

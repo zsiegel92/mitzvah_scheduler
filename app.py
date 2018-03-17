@@ -1,4 +1,4 @@
-from flask import Flask,jsonify
+from flask import Flask,jsonify, request
 import os
 
 from database import db
@@ -36,6 +36,13 @@ def get_schools():
 	else:
 		return jsonify([]),200
 
+@app.route('/api/submission',methods=['GET', 'POST'])
+def submit():
+	# If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
+	# otherwise use request.get_json()
+	for (k,v) in request.json.items():
+		print(f'{k} : {v}')
+	return jsonify({"resp":"good!"}), 200
 
 
 @app.route("/api/hebschools/")

@@ -28,21 +28,29 @@ export class FormComponent implements OnInit {
 		comp;
 
 
+
+
 	move(steps:number):void{
 		this.comp.syncForm();
 		if ((this.step + steps > -1) && (this.step + steps < 4)){
 			this.step = this.step + steps;
 		}
-		this.setcomp()
-		this.comp.prepForm();
-	}
-
-	invalidform(){
-		return false
+		this.setcomp();
 	}
 
 	setcomp(){
 		this.comp = this.comps[this.step];
+		this.comp.prepForm();
+	}
+
+	submit(){
+		this.comp.syncForm();
+		this.formService.submit();
+
+	}
+
+	invalidform(){
+		return false
 	}
 
   constructor(private dataService: DataService,private formService: FormService) {

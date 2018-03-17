@@ -18,10 +18,11 @@ export class DataService {
 
 	private schoolsURL = 'api/schools';  // URL to web api
 	private hebSchoolsURL = 'api/hebschools';  // URL to web api
+	private submissionsURL = 'api/submission';
 
 	/** GET schools from the server */
 	getSchools (): Observable<School[]> {
-		this.messageService.add('DataService: fetched schools');
+		// this.messageService.add('DataService: fetched schools');
 	  return this.http.get<School[]>(this.schoolsURL)
 	  	.pipe(
 	  	      tap(schools => this.log(`fetched schools`)),
@@ -31,7 +32,7 @@ export class DataService {
 
 	/** GET schools from the server */
 	getHebSchools (): Observable<School[]> {
-		this.messageService.add('DataService: fetched hebrew schools');
+		// this.messageService.add('DataService: fetched hebrew schools');
 	  return this.http.get<School[]>(this.hebSchoolsURL)
 	  	.pipe(
 	  	      tap(schools => this.log(`fetched hebrew schools`)),
@@ -65,6 +66,15 @@ export class DataService {
 	    catchError(this.handleError<School>('addSchool'))
 	  );
 	}
+
+	submit(entry: any): Observable<any>{
+		// console.log(entry);
+		return this.http.post<any>(this.submissionsURL, entry, httpOptions).pipe(
+			    tap((entry: any) => this.log('submitted entry')),
+			    catchError(this.handleError<any>('submit'))
+			  );
+	}
+
 
 	/**
 	 * Handle Http operation that failed.

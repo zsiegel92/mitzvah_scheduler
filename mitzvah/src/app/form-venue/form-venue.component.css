@@ -9,7 +9,9 @@ th {
 	font-size: 2em;
 	text-align: left;
 }
-
+th.top {
+	text-align: center;
+}
 td {
 	text-align: center;
 }
@@ -19,7 +21,7 @@ tr:hover {
 }
 
 table, th, td {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     empty-cells: hide;
 }
 

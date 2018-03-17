@@ -18,8 +18,8 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 	<br>
 	<div class="form-group" >
 		<label for="ac_school">Academic School</label>
-		<div *ngIf="schools?.length">
-			<div *ngFor="let school of schools">
+		<div *ngIf="all_schools.schools?.length">
+			<div *ngFor="let school of all_schools.schools">
 				<label>
 					<input  name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="school">{{school.name}}
 				</label>
@@ -29,15 +29,15 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				<input name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="otherSchool"> Other
 			</label>
 		</div>
-		<div *ngIf="!schools || schools.length==0 || selectedSchool==otherSchool">
+		<div *ngIf="!all_schools.schools || all_schools.schools.length==0 || selectedSchool==otherSchool">
 			<input placeholder="Enter academic school name" name="otherSchoolName" type="text" class="form-control" [(ngModel)]="otherSchool.name" >
 		</div>
 	</div>
 	<br>
 	<div class="form-group" >
 		<label for="heb_school">Religious School</label>
-		<div *ngIf="hebSchools?.length">
-			<div *ngFor="let school of hebSchools">
+		<div *ngIf="all_schools.hebSchools?.length">
+			<div *ngFor="let school of all_schools.hebSchools">
 				<label>
 					<input  name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="school">{{school.name}}
 				</label>
@@ -47,7 +47,7 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				<input name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="otherHebSchool"> Other
 			</label>
 		</div>
-		<div *ngIf="!hebSchools || hebSchools.length==0 || hebSchools==otherSchool">
+		<div *ngIf="!all_schools.hebSchools || all_schools.hebSchools.length==0 || selectedHebSchool==otherHebSchool">
 			<input placeholder="Enter religious school name" name="otherHebSchoolName" type="text" class="form-control" [(ngModel)]="otherHebSchool.name" >
 		</div>
 	</div>

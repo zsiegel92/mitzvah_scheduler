@@ -273,18 +273,19 @@ var DataService = /** @class */ (function () {
         this.messageService = messageService;
         this.schoolsURL = 'api/schools'; // URL to web api
         this.hebSchoolsURL = 'api/hebschools'; // URL to web api
+        this.submissionsURL = 'api/submission';
     }
     /** GET schools from the server */
     DataService.prototype.getSchools = function () {
         var _this = this;
-        this.messageService.add('DataService: fetched schools');
+        // this.messageService.add('DataService: fetched schools');
         return this.http.get(this.schoolsURL)
             .pipe(operators_1.tap(function (schools) { return _this.log("fetched schools"); }), operators_1.catchError(this.handleError('getSchools', [])));
     };
     /** GET schools from the server */
     DataService.prototype.getHebSchools = function () {
         var _this = this;
-        this.messageService.add('DataService: fetched hebrew schools');
+        // this.messageService.add('DataService: fetched hebrew schools');
         return this.http.get(this.hebSchoolsURL)
             .pipe(operators_1.tap(function (schools) { return _this.log("fetched hebrew schools"); }), operators_1.catchError(this.handleError('getHebSchools', [])));
     };
@@ -304,6 +305,11 @@ var DataService = /** @class */ (function () {
     DataService.prototype.addSchool = function (school) {
         var _this = this;
         return this.http.post(this.schoolsURL + "/add", school, httpOptions).pipe(operators_1.tap(function (school) { return _this.log("added school w/ id=" + school.id); }), operators_1.catchError(this.handleError('addSchool')));
+    };
+    DataService.prototype.submit = function (entry) {
+        var _this = this;
+        // console.log(entry);
+        return this.http.post(this.submissionsURL, entry, httpOptions).pipe(operators_1.tap(function (entry) { return _this.log('submitted entry'); }), operators_1.catchError(this.handleError('submit')));
     };
     /**
      * Handle Http operation that failed.
@@ -519,7 +525,7 @@ module.exports = ""
 /***/ "./src/app/form-student/form-student.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h3>Student Information</h3>\n<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah\n\tForms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.\nFor assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>\n\n\n<div class = \"container\" >\n\t<div class=\"form-group\">\n\t\t<label for=\"name\">Email Address</label>\n\t\t<!-- <input type=\"text\" class=\"form-control\" id=\"email\" required> -->\n\t\t<input type=\"email\" class=\"form-control\" [(ngModel)]=\"formService.entry.email\" email>\n\t</div>\n\t<br>\n\t<div class=\"form-group\">\n\t\t<label for=\"name\">Child's Name</label>\n\t\t<input type=\"text\" class=\"form-control\" [(ngModel)]=\"formService.entry.childName\" required>\n\t</div>\n\t<br>\n\t<div class=\"form-group\" >\n\t\t<label for=\"ac_school\">Academic School</label>\n\t\t<div *ngIf=\"schools?.length\">\n\t\t\t<div *ngFor=\"let school of schools\">\n\t\t\t\t<label>\n\t\t\t\t\t<input  name=\"ac_school\" type=\"radio\" [(ngModel)]=\"selectedSchool\" [value]=\"school\">{{school.name}}\n\t\t\t\t</label>\n\t\t\t\t<br>\n\t\t\t</div>\n\t\t\t<label>\n\t\t\t\t<input name=\"ac_school\" type=\"radio\" [(ngModel)]=\"selectedSchool\" [value]=\"otherSchool\"> Other\n\t\t\t</label>\n\t\t</div>\n\t\t<div *ngIf=\"!schools || schools.length==0 || selectedSchool==otherSchool\">\n\t\t\t<input placeholder=\"Enter academic school name\" name=\"otherSchoolName\" type=\"text\" class=\"form-control\" [(ngModel)]=\"otherSchool.name\" >\n\t\t</div>\n\t</div>\n\t<br>\n\t<div class=\"form-group\" >\n\t\t<label for=\"heb_school\">Religious School</label>\n\t\t<div *ngIf=\"hebSchools?.length\">\n\t\t\t<div *ngFor=\"let school of hebSchools\">\n\t\t\t\t<label>\n\t\t\t\t\t<input  name=\"heb_school\" type=\"radio\" [(ngModel)]=\"selectedHebSchool\" [value]=\"school\">{{school.name}}\n\t\t\t\t</label>\n\t\t\t\t<br>\n\t\t\t</div>\n\t\t\t<label>\n\t\t\t\t<input name=\"heb_school\" type=\"radio\" [(ngModel)]=\"selectedHebSchool\" [value]=\"otherHebSchool\"> Other\n\t\t\t</label>\n\t\t</div>\n\t\t<div *ngIf=\"!hebSchools || hebSchools.length==0 || hebSchools==otherSchool\">\n\t\t\t<input placeholder=\"Enter religious school name\" name=\"otherHebSchoolName\" type=\"text\" class=\"form-control\" [(ngModel)]=\"otherHebSchool.name\" >\n\t\t</div>\n\t</div>\n\t<br>\n\tDate of Birth:\n\t<br>\n\t<div style=\"display:flex; flex-flow: row wrap;\">\n\t\t<div style=\"flex:1; flex-basis: 25%;\">\n\t\t\t<div style=\"display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;\">\n\t\t\t\t<div>\n\t\t\t\t\t<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>\n\t\t\t\t\t<br>\n\t\t\t\t\t<ngb-datepicker #dp (navigate)=\"date = $event.next\" [(ngModel)]=\"model.greg\" outsideDays=\"hidden\" (select)=\"model.update()\" [minDate]=\"minDate\" [maxDate]=\"maxDate\" [startDate]=\"model.getGreg()\"></ngb-datepicker>\n\t\t\t\t\t<br><br>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<button class=\"btn btn-sm btn-outline-info\" (click)=\"model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})\">\n\t\t\t\t\t\tThirteen Years Ago...\n\t\t\t\t\t\t</button>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t<br>\n\t\t\t\t<div>\n\t\t\t\t\t<div *ngIf=\"model.holidays?.length!=0; else elseBlock\">\n\t\t\t\t\t\t<b>Holidays on this day:</b>\n\t\t\t\t\t\t<ul>\n\t\t\t\t\t\t\t<li *ngFor=\"let holiday of model.holidays\">{{holiday.desc}}</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t\t\t<ng-template #elseBlock>\n\t\t\t\t\t<b>No holidays on this day.</b>\n\t\t\t\t\t</ng-template>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n</div>\n"
+module.exports = "<h3>Student Information</h3>\n<p>Please fill in the information below to help Sinai Temple plan and schedule your child's B'nai Mitzvah\n\tForms submitted by March 15 th 2018 will be given first preference in terms of dates and venue selection.\nFor assistance submitting this information, please contact [CONTACT EMAIL FOR PLANNING]</p>\n\n\n<div class = \"container\" >\n\t<div class=\"form-group\">\n\t\t<label for=\"name\">Email Address</label>\n\t\t<!-- <input type=\"text\" class=\"form-control\" id=\"email\" required> -->\n\t\t<input type=\"email\" class=\"form-control\" [(ngModel)]=\"formService.entry.email\" email>\n\t</div>\n\t<br>\n\t<div class=\"form-group\">\n\t\t<label for=\"name\">Child's Name</label>\n\t\t<input type=\"text\" class=\"form-control\" [(ngModel)]=\"formService.entry.childName\" required>\n\t</div>\n\t<br>\n\t<div class=\"form-group\" >\n\t\t<label for=\"ac_school\">Academic School</label>\n\t\t<div *ngIf=\"all_schools.schools?.length\">\n\t\t\t<div *ngFor=\"let school of all_schools.schools\">\n\t\t\t\t<label>\n\t\t\t\t\t<input  name=\"ac_school\" type=\"radio\" [(ngModel)]=\"selectedSchool\" [value]=\"school\">{{school.name}}\n\t\t\t\t</label>\n\t\t\t\t<br>\n\t\t\t</div>\n\t\t\t<label>\n\t\t\t\t<input name=\"ac_school\" type=\"radio\" [(ngModel)]=\"selectedSchool\" [value]=\"otherSchool\"> Other\n\t\t\t</label>\n\t\t</div>\n\t\t<div *ngIf=\"!all_schools.schools || all_schools.schools.length==0 || selectedSchool==otherSchool\">\n\t\t\t<input placeholder=\"Enter academic school name\" name=\"otherSchoolName\" type=\"text\" class=\"form-control\" [(ngModel)]=\"otherSchool.name\" >\n\t\t</div>\n\t</div>\n\t<br>\n\t<div class=\"form-group\" >\n\t\t<label for=\"heb_school\">Religious School</label>\n\t\t<div *ngIf=\"all_schools.hebSchools?.length\">\n\t\t\t<div *ngFor=\"let school of all_schools.hebSchools\">\n\t\t\t\t<label>\n\t\t\t\t\t<input  name=\"heb_school\" type=\"radio\" [(ngModel)]=\"selectedHebSchool\" [value]=\"school\">{{school.name}}\n\t\t\t\t</label>\n\t\t\t\t<br>\n\t\t\t</div>\n\t\t\t<label>\n\t\t\t\t<input name=\"heb_school\" type=\"radio\" [(ngModel)]=\"selectedHebSchool\" [value]=\"otherHebSchool\"> Other\n\t\t\t</label>\n\t\t</div>\n\t\t<div *ngIf=\"!all_schools.hebSchools || all_schools.hebSchools.length==0 || selectedHebSchool==otherHebSchool\">\n\t\t\t<input placeholder=\"Enter religious school name\" name=\"otherHebSchoolName\" type=\"text\" class=\"form-control\" [(ngModel)]=\"otherHebSchool.name\" >\n\t\t</div>\n\t</div>\n\t<br>\n\tDate of Birth:\n\t<br>\n\t<div style=\"display:flex; flex-flow: row wrap;\">\n\t\t<div style=\"flex:1; flex-basis: 25%;\">\n\t\t\t<div style=\"display: inline-block; border: 2px solid black;padding: 15px; margin: 5px; border-radius: 12px;\">\n\t\t\t\t<div>\n\t\t\t\t\t<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>\n\t\t\t\t\t<br>\n\t\t\t\t\t<ngb-datepicker #dp (navigate)=\"date = $event.next\" [(ngModel)]=\"model.greg\" outsideDays=\"hidden\" (select)=\"model.update()\" [minDate]=\"minDate\" [maxDate]=\"maxDate\" [startDate]=\"model.getGreg()\"></ngb-datepicker>\n\t\t\t\t\t<br><br>\n\t\t\t\t\t<div>\n\t\t\t\t\t\t<button class=\"btn btn-sm btn-outline-info\" (click)=\"model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})\">\n\t\t\t\t\t\tThirteen Years Ago...\n\t\t\t\t\t\t</button>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t<br>\n\t\t\t\t<div>\n\t\t\t\t\t<div *ngIf=\"model.holidays?.length!=0; else elseBlock\">\n\t\t\t\t\t\t<b>Holidays on this day:</b>\n\t\t\t\t\t\t<ul>\n\t\t\t\t\t\t\t<li *ngFor=\"let holiday of model.holidays\">{{holiday.desc}}</li>\n\t\t\t\t\t\t</ul>\n\t\t\t\t\t</div>\n\t\t\t\t\t<ng-template #elseBlock>\n\t\t\t\t\t<b>No holidays on this day.</b>\n\t\t\t\t\t</ng-template>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n</div>\n"
 
 /***/ }),
 
@@ -555,15 +561,8 @@ var FormStudentComponent = /** @class */ (function () {
         this.selectedSchool = this.otherSchool;
         this.selectedHebSchool = this.otherHebSchool;
     }
-    FormStudentComponent.prototype.getSchools = function () {
-        var _this = this;
-        this.dataService.getSchools()
-            .subscribe(function (schs) { return _this.schools = schs; });
-    };
-    FormStudentComponent.prototype.getHebSchools = function () {
-        var _this = this;
-        this.dataService.getHebSchools()
-            .subscribe(function (schs) { return _this.hebSchools = schs; });
+    FormStudentComponent.prototype.get_all_schools = function () {
+        this.all_schools = this.formService.all_schools;
     };
     FormStudentComponent.prototype.syncForm = function () {
         this.formService.birthday = this.model;
@@ -574,13 +573,11 @@ var FormStudentComponent = /** @class */ (function () {
         this.formService.entry.DOB = this.model.hgregorian;
     };
     FormStudentComponent.prototype.prepForm = function () {
+        this.get_all_schools();
     };
     FormStudentComponent.prototype.ngOnInit = function () {
         this.model = new DoubleDate_1.DoubleDate();
         this.model.thirteen_ago();
-        this.getSchools();
-        // this.schools=[];
-        this.getHebSchools();
     };
     FormStudentComponent = __decorate([
         core_1.Component({
@@ -600,14 +597,14 @@ exports.FormStudentComponent = FormStudentComponent;
 /***/ "./src/app/form-venue/form-venue.component.css":
 /***/ (function(module, exports) {
 
-module.exports = "table {\n    border-collapse: collapse;\n    table-layout: fixed;\n    width: 100%;\n\n}\n\nth {\n\tfont-size: 2em;\n\ttext-align: left;\n}\n\ntd {\n\ttext-align: center;\n}\n\ntr:hover {\n\tbackground-color: #f5f5f5;\n}\n\ntable, th, td {\n    border: 1px solid #ddd;\n    empty-cells: hide;\n}\n\n@media screen and (max-width: 800px) {\n\tth {\n\t\tfont-size: 0.75em;\n\t}\n}\n\n@media screen and (max-width: 350) {\n\tth {\n\t\tfont-size: 0.6;\n\t}\n}\n\n/**/\n\ninput[type=\"checkbox\"], input[type=\"radio\"]{\n\tposition: absolute;\n\tright: 9000px;\n}\n\n/*Check box*/\n\ninput[type=\"checkbox\"] + .label-text:before{\n\tcontent: \"\\f096\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 5px;\n}\n\ninput[type=\"checkbox\"]:checked + .label-text:before{\n\tcontent: \"\\f14a\";\n\tcolor: #2980b9;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\ninput[type=\"checkbox\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\ninput[type=\"checkbox\"]:disabled + .label-text:before{\n\tcontent: \"\\f0c8\";\n\tcolor: #ccc;\n}\n\n/*Radio box*/\n\ninput[type=\"radio\"]\n{\n  /* Double-sized Checkboxes */\n  -ms-transform: scale(1.5); /* IE */\n  -moz-transform: scale(1.5); /* FF */\n  -webkit-transform: scale(1.5); /* Safari and Chrome */\n  -o-transform: scale(1.5); /* Opera */\n  padding: 5px;\n}\n\ninput[type=\"radio\"] + .label-text:before{\n\tcontent: \"\\f10c\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 5px;\n}\n\ninput[type=\"radio\"]:checked + .label-text:before{\n\tcontent: \"\\f192\";\n\tcolor: #8e44ad;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\ninput[type=\"radio\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\ninput[type=\"radio\"]:disabled + .label-text:before{\n\tcontent: \"\\f111\";\n\tcolor: #ccc;\n}\n\n/*Radio Toggle*/\n\n.toggle input[type=\"radio\"] + .label-text:before{\n\tcontent: \"\\f204\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 10px;\n}\n\n.toggle input[type=\"radio\"]:checked + .label-text:before{\n\tcontent: \"\\f205\";\n\tcolor: #16a085;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\n.toggle input[type=\"radio\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\n.toggle input[type=\"radio\"]:disabled + .label-text:before{\n\tcontent: \"\\f204\";\n\tcolor: #ccc;\n}\n\n@-webkit-keyframes effect{\n\t0%{-webkit-transform: scale(0);transform: scale(0);}\n\t25%{-webkit-transform: scale(1.3);transform: scale(1.3);}\n\t75%{-webkit-transform: scale(1.4);transform: scale(1.4);}\n\t100%{-webkit-transform: scale(1);transform: scale(1);}\n}\n\n@keyframes effect{\n\t0%{-webkit-transform: scale(0);transform: scale(0);}\n\t25%{-webkit-transform: scale(1.3);transform: scale(1.3);}\n\t75%{-webkit-transform: scale(1.4);transform: scale(1.4);}\n\t100%{-webkit-transform: scale(1);transform: scale(1);}\n}\n"
+module.exports = "table {\n    border-collapse: collapse;\n    table-layout: fixed;\n    width: 100%;\n\n}\n\nth {\n\tfont-size: 2em;\n\ttext-align: left;\n}\n\nth.top {\n\ttext-align: center;\n}\n\ntd {\n\ttext-align: center;\n}\n\ntr:hover {\n\tbackground-color: #f5f5f5;\n}\n\ntable, th, td {\n    border: 1px solid #ccc;\n    empty-cells: hide;\n}\n\n@media screen and (max-width: 800px) {\n\tth {\n\t\tfont-size: 0.75em;\n\t}\n}\n\n@media screen and (max-width: 350) {\n\tth {\n\t\tfont-size: 0.6;\n\t}\n}\n\n/**/\n\ninput[type=\"checkbox\"], input[type=\"radio\"]{\n\tposition: absolute;\n\tright: 9000px;\n}\n\n/*Check box*/\n\ninput[type=\"checkbox\"] + .label-text:before{\n\tcontent: \"\\f096\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 5px;\n}\n\ninput[type=\"checkbox\"]:checked + .label-text:before{\n\tcontent: \"\\f14a\";\n\tcolor: #2980b9;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\ninput[type=\"checkbox\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\ninput[type=\"checkbox\"]:disabled + .label-text:before{\n\tcontent: \"\\f0c8\";\n\tcolor: #ccc;\n}\n\n/*Radio box*/\n\ninput[type=\"radio\"]\n{\n  /* Double-sized Checkboxes */\n  -ms-transform: scale(1.5); /* IE */\n  -moz-transform: scale(1.5); /* FF */\n  -webkit-transform: scale(1.5); /* Safari and Chrome */\n  -o-transform: scale(1.5); /* Opera */\n  padding: 5px;\n}\n\ninput[type=\"radio\"] + .label-text:before{\n\tcontent: \"\\f10c\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 5px;\n}\n\ninput[type=\"radio\"]:checked + .label-text:before{\n\tcontent: \"\\f192\";\n\tcolor: #8e44ad;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\ninput[type=\"radio\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\ninput[type=\"radio\"]:disabled + .label-text:before{\n\tcontent: \"\\f111\";\n\tcolor: #ccc;\n}\n\n/*Radio Toggle*/\n\n.toggle input[type=\"radio\"] + .label-text:before{\n\tcontent: \"\\f204\";\n\tfont-family: \"FontAwesome\";\n\tspeak: none;\n\tfont-style: normal;\n\tfont-weight: normal;\n\tfont-variant: normal;\n\ttext-transform: none;\n\tline-height: 1;\n\t-webkit-font-smoothing:antialiased;\n\twidth: 1em;\n\tdisplay: inline-block;\n\tmargin-right: 10px;\n}\n\n.toggle input[type=\"radio\"]:checked + .label-text:before{\n\tcontent: \"\\f205\";\n\tcolor: #16a085;\n\t-webkit-animation: effect 250ms ease-in;\n\t        animation: effect 250ms ease-in;\n}\n\n.toggle input[type=\"radio\"]:disabled + .label-text{\n\tcolor: #aaa;\n}\n\n.toggle input[type=\"radio\"]:disabled + .label-text:before{\n\tcontent: \"\\f204\";\n\tcolor: #ccc;\n}\n\n@-webkit-keyframes effect{\n\t0%{-webkit-transform: scale(0);transform: scale(0);}\n\t25%{-webkit-transform: scale(1.3);transform: scale(1.3);}\n\t75%{-webkit-transform: scale(1.4);transform: scale(1.4);}\n\t100%{-webkit-transform: scale(1);transform: scale(1);}\n}\n\n@keyframes effect{\n\t0%{-webkit-transform: scale(0);transform: scale(0);}\n\t25%{-webkit-transform: scale(1.3);transform: scale(1.3);}\n\t75%{-webkit-transform: scale(1.4);transform: scale(1.4);}\n\t100%{-webkit-transform: scale(1);transform: scale(1);}\n}\n"
 
 /***/ }),
 
 /***/ "./src/app/form-venue/form-venue.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h3>Venue Information</h3>\n<table>\n\t<tr>\n\t\t<th></th>\n\t\t<th>Strongly Prefer</th>\n\t\t<th>Indifferent</th>\n\t\t<th>Would not like this venue</th>\n\t</tr>\n\t<tr *ngFor=\"let venue of models\">\n\t\t<th>{{venue.name}}</th>\n\t\t<td (click)=\"venue.value=1\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\" name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"1\"></label>\n\t\t\t</div>\n\t\t</td>\n\t\t<td (click)=\"venue.value=0\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\"  name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"0\"></label>\n\t\t\t</div>\n\t\t</td>\n\t\t<td (click)=\"venue.value=-1\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\" name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"-1\"></label>\n\t\t\t</div>\n\t\t</td>\n\t</tr>\n</table>\n"
+module.exports = "<h3>Venue Information</h3>\n<table>\n\t<tr>\n\t\t<th></th>\n\t\t<th class=\"top\">Strongly Prefer</th>\n\t\t<th class=\"top\">Indifferent</th>\n\t\t<th class=\"top\">Would not like this venue</th>\n\t</tr>\n\t<tr *ngFor=\"let venue of models\">\n\t\t<th>{{venue.name}}</th>\n\t\t<td (click)=\"venue.value=1\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\" name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"1\"></label>\n\t\t\t</div>\n\t\t</td>\n\t\t<td (click)=\"venue.value=0\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\"  name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"0\"></label>\n\t\t\t</div>\n\t\t</td>\n\t\t<td (click)=\"venue.value=-1\">\n\t\t\t<div class=\"form-check\">\n\t\t\t\t<label class=\"radio-inline\"><input type=\"radio\" name=\"venue_{{venue.id}}\" [(ngModel)]=\"venue.value\" [value]=\"-1\"></label>\n\t\t\t</div>\n\t\t</td>\n\t</tr>\n</table>\n"
 
 /***/ }),
 
@@ -673,16 +670,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
+var data_service_1 = __webpack_require__("./src/app/data.service.ts");
 var FormService = /** @class */ (function () {
-    function FormService() {
+    function FormService(dataService) {
+        this.dataService = dataService;
         this.entry = { email: '', childName: '', school: '', schoolId: -1, hebSchool: '', hebSchoolId: -1, DOB: null, rankings: [{ name: "Main Sanctuary", value: 0 }, { name: "Family Minyan", value: 0 }, { name: "Torah In The Round", value: 0 }], nonDates: [], accommodation: false, accommodation_other: '', twin: false };
+        this.all_schools = { schools: [], hebSchools: [] };
+        this.getSchools();
+        this.getHebSchools();
     }
+    FormService.prototype.getSchools = function () {
+        var _this = this;
+        this.dataService.getSchools().subscribe(function (schs) {
+            _this.schools = schs;
+            _this.all_schools.schools = schs;
+        });
+    };
+    FormService.prototype.getHebSchools = function () {
+        var _this = this;
+        this.dataService.getHebSchools().subscribe(function (schs) {
+            _this.hebSchools = schs;
+            _this.all_schools.hebSchools = schs;
+        });
+    };
+    FormService.prototype.submit = function () {
+        this.dataService.submit(this.entry).subscribe();
+    };
     FormService.prototype.set_email = function (email) {
         this.entry.email = email;
     };
+    FormService.prototype.ngOnInit = function () { };
     FormService = __decorate([
         core_1.Injectable(),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [data_service_1.DataService])
     ], FormService);
     return FormService;
 }());
@@ -701,7 +721,7 @@ module.exports = "button.back {\n\tmargin-left:3em\n}\n\nbutton.forward {\n\tmar
 /***/ "./src/app/form/form.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"form-component\">\n\t<br>\n\t<button class=\"btn btn-secondary btn-lg back\" (click)=\"move(-1)\" [disabled]=\"step===0 || invalidform()\">BACK</button>\n\t<button class=\"btn btn-secondary btn-lg forward\" (click)=\"move(1)\" [disabled]=\"step===3 || invalidform()\">NEXT</button>\n\t<br>\n\t<br>\n\t<app-form-student #studentform [hidden]=\"step!==0\"></app-form-student>\n\t<app-form-venue #venueform [hidden]=\"step!==1\"></app-form-venue>\n\t<app-form-date #dateform [hidden]=\"step!==2\"></app-form-date>\n\t<app-form-accommodation #accommodationform [hidden]=\"step!==3\"></app-form-accommodation>\n\t<br>\n\t<br>\n\t<button class=\"btn btn-secondary btn-lg back\" (click)=\"move(-1)\" [disabled]=\"step===0 || invalidform()\">BACK</button>\n\t<button class=\"btn btn-secondary btn-lg forward\"  (click)=\"move(1)\" [disabled]=\"step===3 || invalidform()\">NEXT</button>\n\t<br>\n\t<br>\n\t<p><ngb-progressbar type=\"success\" [value]=\"step*25\"></ngb-progressbar></p>\n\t<br>\n\t<br>\n\n\t<!-- <pre>formService.entry: {{formService.entry | json}}</pre> -->\n</div>\n"
+module.exports = "<div class=\"form-component\">\n\t<br>\n\t<button class=\"btn btn-secondary btn-lg back\" (click)=\"move(-1)\" [disabled]=\"step===0 || invalidform()\">\n\tBACK\n\t</button>\n\t<button  *ngIf=\"step<3\" class=\"btn btn-secondary btn-lg forward\" (click)=\"move(1)\" [disabled]=\"step===3 || invalidform()\">\n\tNEXT\n\t</button>\n\t<button *ngIf=\"step==3\" class=\"btn btn-primary btn-lg forward\"  (click)=\"submit()\" [disabled]=\"invalidform()\">\n\tSUBMIT\n\t</button>\n\t<br>\n\t<br>\n\t<app-form-student #studentform [hidden]=\"step!==0\">\n\t</app-form-student>\n\t<app-form-venue #venueform [hidden]=\"step!==1\">\n\t</app-form-venue>\n\t<app-form-date #dateform [hidden]=\"step!==2\">\n\t</app-form-date>\n\t<app-form-accommodation #accommodationform [hidden]=\"step!==3\">\n\t</app-form-accommodation>\n\t<br>\n\t<br>\n\t<button class=\"btn btn-secondary btn-lg back\" (click)=\"move(-1)\" [disabled]=\"step===0 || invalidform()\">\n\tBACK\n\t</button>\n\t<button *ngIf=\"step<3\" class=\"btn btn-secondary btn-lg forward\"  (click)=\"move(1)\" [disabled]=\"invalidform()\"\n\t>NEXT\n\t</button>\n\t<button *ngIf=\"step==3\" class=\"btn btn-primary btn-lg forward\"  (click)=\"submit()\" [disabled]=\"invalidform()\">\n\tSUBMIT\n\t</button>\n\t<br>\n\t<br>\n\t<p><ngb-progressbar type=\"success\" [value]=\"step*25\"></ngb-progressbar></p>\n\t<br>\n\t<br>\n\t<pre>\n\t\tformService.entry: {{formService.entry | json}}\n\t\t<br>\n\t\tformService.schools: {{formService.schools | json}}\n\t</pre>\n</div>\n"
 
 /***/ }),
 
@@ -740,13 +760,17 @@ var FormComponent = /** @class */ (function () {
             this.step = this.step + steps;
         }
         this.setcomp();
-        this.comp.prepForm();
-    };
-    FormComponent.prototype.invalidform = function () {
-        return false;
     };
     FormComponent.prototype.setcomp = function () {
         this.comp = this.comps[this.step];
+        this.comp.prepForm();
+    };
+    FormComponent.prototype.submit = function () {
+        this.comp.syncForm();
+        this.formService.submit();
+    };
+    FormComponent.prototype.invalidform = function () {
+        return false;
     };
     FormComponent.prototype.ngOnInit = function () {
         this.comps = [this.studentForm, this.venueForm, this.dateForm, this.accommodationForm];
