@@ -41,13 +41,13 @@ table, th, td {
 /**/
 
 
-input[type="checkbox"], input[type="radio"]{
+/*input[type="checkbox"], input[type="radio"]{
 	position: absolute;
 	right: 9000px;
-}
+}*/
 
 /*Check box*/
-input[type="checkbox"] + .label-text:before{
+/*input[type="checkbox"] + .label-text:before{
 	content: "\f096";
 	font-family: "FontAwesome";
 	speak: none;
@@ -60,22 +60,22 @@ input[type="checkbox"] + .label-text:before{
 	width: 1em;
 	display: inline-block;
 	margin-right: 5px;
-}
+}*/
 
-input[type="checkbox"]:checked + .label-text:before{
+/*input[type="checkbox"]:checked + .label-text:before{
 	content: "\f14a";
 	color: #2980b9;
 	animation: effect 250ms ease-in;
-}
+}*/
 
-input[type="checkbox"]:disabled + .label-text{
+/*input[type="checkbox"]:disabled + .label-text{
 	color: #aaa;
-}
+}*/
 
-input[type="checkbox"]:disabled + .label-text:before{
+/*input[type="checkbox"]:disabled + .label-text:before{
 	content: "\f0c8";
 	color: #ccc;
-}
+}*/
 
 /*Radio box*/
 
@@ -90,7 +90,7 @@ input[type="radio"]
 }
 
 
-input[type="radio"] + .label-text:before{
+/*input[type="radio"] + .label-text:before{
 	content: "\f10c";
 	font-family: "FontAwesome";
 	speak: none;
@@ -103,8 +103,11 @@ input[type="radio"] + .label-text:before{
 	width: 1em;
 	display: inline-block;
 	margin-right: 5px;
-}
+}*/
 
+
+
+/*
 input[type="radio"]:checked + .label-text:before{
 	content: "\f192";
 	color: #8e44ad;
@@ -118,10 +121,10 @@ input[type="radio"]:disabled + .label-text{
 input[type="radio"]:disabled + .label-text:before{
 	content: "\f111";
 	color: #ccc;
-}
+}*/
 
 /*Radio Toggle*/
-
+/*
 .toggle input[type="radio"] + .label-text:before{
 	content: "\f204";
 	font-family: "FontAwesome";
@@ -159,3 +162,4 @@ input[type="radio"]:disabled + .label-text:before{
 	75%{transform: scale(1.4);}
 	100%{transform: scale(1);}
 }
+*/

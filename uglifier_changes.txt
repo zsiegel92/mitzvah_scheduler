@@ -1,0 +1,32 @@
+UGLIFY changes for `ng build --prod`
+
+>>> npm ls uglify-es
+└─┬ @angular/cli@1.7.2
+  └─┬ uglifyjs-webpack-plugin@1.2.2
+    └── uglify-es@3.3.9
+
+>>> npm i uglify-es@3.2.2 --save-exact
+
+>>> npm ls uglify-es
+├─┬ @angular/cli@1.7.2
+│ └─┬ uglifyjs-webpack-plugin@1.2.2
+│   └── uglify-es@3.3.9
+└── uglify-es@3.2.2
+
+
+TO FULLY REPLACE (according to https://github.com/angular/angular-cli/issues/8997#issuecomment-353950777):
+
+>>> npm i uglify-es@3.2.2 --save-exact && rm -rf package-lock.json node_modules && npm i && npm ls uglify-es
+
++-- @angular/cli@1.6.2
+| `-- uglifyjs-webpack-plugin@1.1.2
+|   `-- uglify-es@3.2.2  deduped
+`-- uglify-es@3.2.2
+
+But still have
+├─┬ @angular/cli@1.7.3
+│ └─┬ uglifyjs-webpack-plugin@1.2.4
+│   └── uglify-es@3.3.9
+└── uglify-es@3.2.2
+
+NOT WORKING STILL.
