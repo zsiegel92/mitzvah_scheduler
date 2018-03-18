@@ -6,6 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --watch",
+    "nearprod":"ng build --build-optimizer true --aot true --extract-css true --named-chunks false --sourcemaps false --output-hashing all",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
