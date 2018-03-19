@@ -1,10 +1,10 @@
-import {Component, Input, OnInit, ViewChild, QueryList, ViewChildren, ViewContainerRef} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+// import {QueryList, ViewChildren, ViewContainerRef} from '@angular/core';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
-import { DoubleDate } from '../DoubleDate';
+import { FormsModule,NgForm } from '@angular/forms';
 
-// import { DatepickerComponent } from '../datepicker/datepicker.component';
+import { DoubleDate } from '../DoubleDate';
 import { FormService } from '../form.service';
-// import { DoubleDate } from '../DoubleDate';
 import { MessageService } from '../message.service';
 
 const now = new Date();
@@ -15,7 +15,7 @@ const now = new Date();
   styleUrls: ['./form-date.component.css']
 })
 export class FormDateComponent implements OnInit {
-
+	@ViewChild("f") f: NgForm;
 	// @ViewChildren("dp") dps: QueryList<any>
 
 	birthday: NgbDateStruct = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate()};

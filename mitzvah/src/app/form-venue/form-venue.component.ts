@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule,NgForm } from '@angular/forms';
 import { FormService } from '../form.service';
 
 @Component({
@@ -8,6 +8,7 @@ import { FormService } from '../form.service';
   styleUrls: ['./form-venue.component.css']
 })
 export class FormVenueComponent implements OnInit {
+	@ViewChild("f") f: NgForm;
 	// model = {main: 0, family_minyan: 0, torah_round: 0}
 	models = [{name:"Main Sanctuary",value: 0,id:0},{name:"Family Minyan",value: 0,id:1},{name:"Torah In The Round",value: 0,id:2}];
 

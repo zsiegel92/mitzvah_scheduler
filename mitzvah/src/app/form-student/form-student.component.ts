@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { FormsModule,NgForm } from '@angular/forms';
+
 import { DoubleDate } from '../DoubleDate';
-
 import { School } from '../school';
-
 import { DataService } from '../data.service';
 import { FormService } from '../form.service';
 
@@ -15,6 +15,7 @@ const now = new Date();
   styleUrls: ['./form-student.component.css']
 })
 export class FormStudentComponent implements OnInit {
+	@ViewChild("f") f: NgForm;
 
 	schools: School[];
 	hebSchools: School[];

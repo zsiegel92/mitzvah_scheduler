@@ -1,32 +1,36 @@
+<!-- <pre>
+	accommodation: {{accommodation}}
+	<br>
+	comp.f.form.status: {{f.form.status}}
+	<br>
+	comp.f.form.value: {{f.form.value | json}}
+	<br>
+	comp.f.form.errors: {{f.form.errors}}
+</pre> -->
 <h3>Additional Information</h3>
-
 Is your child a twin who will be sharing the service with their sibling?
 <br>
-<div class="btn-group btn-group-toggle" ngbRadioGroup name="twin" [(ngModel)]="twin">
-		<label ngbButtonLabel class="btn-primary">
-			<input ngbButton type="radio" [value]="true"> Yes
-		</label>
-		<label ngbButtonLabel class="btn-primary">
-			<input ngbButton type="radio" [value]="false"> No
-		</label>
-</div>
-<br>
-
-What special accommodations will your child need for their service?
-<br>
-<div class="btn-group btn-group-toggle" ngbRadioGroup name="accommodation" [(ngModel)]="accommodation">
-		<label ngbButtonLabel class="btn-primary">
-			<input ngbButton type="radio" [value]="false"> None
-		</label>
-		<label ngbButtonLabel class="btn-primary">
-			<input ngbButton type="radio" [value]="true"> Other
-		</label>
-</div>
-
-
-<div *ngIf="accommodation">
+<form  #f="ngForm">
 	<div class="form-group">
-		<label for="accommodation">Additional accommodation needed</label>
-		<input type="text" [(ngModel)]="accommodation_other" class="form-control">
+		<label>
+			<input name="is_twin" [(ngModel)]="twin" type="radio" [value]="true"> Yes
+		</label>
+		<label>
+			<input name="is_twin" [(ngModel)]="twin" type="radio" [value]="false"> No
+		</label>
+		<br>
+		What special accommodations will your child need for their service?
+		<br>
+		<label >
+			<input name="needs_accommodation" [(ngModel)]="accommodation" type="radio" [value]="false"> None
+		</label>
+		<label >
+			<input name="needs_accommodation" [(ngModel)]="accommodation" type="radio" [value]="true"> Other
+		</label>
+
+		<div [hidden]="!accommodation">
+			<input placeholder="Additional accommodation needed" name="accommodation_other_text" type="text" class="form-control" [(ngModel)]="accommodation_other" #accommodationOtherText="ngModel" [required]="accommodation">
+		</div>
+
 	</div>
-</div>
+</form>

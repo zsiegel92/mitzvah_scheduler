@@ -1,12 +1,36 @@
+<!-- <div *ngIf="comp">
+	comp exists!
+	<div *ngIf="comp.f">
+		comp.f exists!
+		<div *ngIf="comp.f.form">
+			comp.f.form exists!
+			<div *ngIf="comp.f.form">
+				comp.f.form.status exists!
+			</div>
+			<pre>
+				comp.f.form.valid: {{comp.f.form.valid}}
+				<br>
+				comp.f.form.invalid: {{comp.f.form.invalid}}
+				<br>
+				comp.f.form.status: {{comp.f.form.status}}
+				<br>
+				comp.f.form.value: {{comp.f.form.value | json}}
+				<br>
+				comp.f.form.errors: {{comp.f.form.errors}}
+			</pre>
+		</div>
+	</div>
+</div> -->
+
 <div class="form-component">
 	<br>
-	<button class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0 || invalidform()">
+	<button [hidden]="step===0" class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0">
 	BACK
 	</button>
-	<button  *ngIf="step<3" class="btn btn-secondary btn-lg forward" (click)="move(1)" [disabled]="step===3 || invalidform()">
+	<button  [hidden]="step==3" class="btn btn-secondary btn-lg forward" (click)="move(1)" [disabled]="comp.f.form.invalid">
 	NEXT
 	</button>
-	<button *ngIf="step==3" class="btn btn-primary btn-lg forward"  (click)="submit()" [disabled]="invalidform()">
+	<button [hidden]="step<3" class="btn btn-primary btn-lg forward"  (click)="submit()" [disabled]="comp.f.form.invalid">
 	SUBMIT
 	</button>
 	<br>
@@ -21,13 +45,13 @@
 	</app-form-accommodation>
 	<br>
 	<br>
-	<button class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0 || invalidform()">
+	<button [hidden]="step===0" class="btn btn-secondary btn-lg back" (click)="move(-1)" [disabled]="step===0">
 	BACK
 	</button>
-	<button *ngIf="step<3" class="btn btn-secondary btn-lg forward"  (click)="move(1)" [disabled]="invalidform()"
-	>NEXT
+	<button [hidden]="step==3" class="btn btn-secondary btn-lg forward"  (click)="move(1)" [disabled]="comp.f.form.invalid">
+		NEXT
 	</button>
-	<button *ngIf="step==3" class="btn btn-primary btn-lg forward"  (click)="submit()" [disabled]="invalidform()">
+	<button [hidden]="step<3" class="btn btn-primary btn-lg forward"  (click)="submit()" [disabled]="comp.f.form.invalid">
 	SUBMIT
 	</button>
 	<br>

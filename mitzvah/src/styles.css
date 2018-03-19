@@ -8,6 +8,11 @@
 @import '~bootstrap/dist/css/bootstrap.min.css';
 @import '~font-awesome/css/font-awesome.min.css';
 
+body {
+  margin: 2em;
+  background-color: #e0ddd0;
+  color: #4a567a;
+}
 
 h1 {
   color: #369;
@@ -23,11 +28,16 @@ input[text], button {
   color: #888;
   font-family: Cambria, Georgia;
 }
-body {
-  margin: 2em;
-  background-color: #e0ddd0;
-  color: #4a567a;
+
+.ng-valid[required], .ng-valid.required  {
+  border-left: 5px solid #42A948; /* green */
 }
+
+.ng-invalid:not(form)  {
+  border-left: 5px solid #a94442; /* red */
+}
+
+
 ngb-datepicker {
 	background-color: #faf9f5;
 }

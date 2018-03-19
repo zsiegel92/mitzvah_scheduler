@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule,NgForm } from '@angular/forms';
 import { FormService } from '../form.service';
 
 @Component({
@@ -8,8 +8,9 @@ import { FormService } from '../form.service';
   styleUrls: ['./form-accommodation.component.css']
 })
 export class FormAccommodationComponent implements OnInit {
-	accommodation: boolean = false;
-	accommodation_other: string = '';
+	@ViewChild("f") f: NgForm;
+	accommodation: boolean = true;
+	accommodation_other: string = "";
 	twin: boolean = false;
 
 	syncForm(){
@@ -21,7 +22,9 @@ export class FormAccommodationComponent implements OnInit {
 
 	}
 
-  constructor(private formService: FormService) { }
+  constructor(private formService: FormService) {
+  	this.accommodation = true;
+  }
 
   ngOnInit() {
   }

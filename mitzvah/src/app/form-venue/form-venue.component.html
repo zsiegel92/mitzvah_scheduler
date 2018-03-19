@@ -1,27 +1,29 @@
 <h3>Venue Information</h3>
-<table>
-	<tr>
-		<th></th>
-		<th class="top">Strongly Prefer</th>
-		<th class="top">Indifferent</th>
-		<th class="top">Would not like this venue</th>
-	</tr>
-	<tr *ngFor="let venue of models">
-		<th>{{venue.name}}</th>
-		<td (click)="venue.value=1">
-			<div class="form-check">
-				<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="1"></label>
-			</div>
-		</td>
-		<td (click)="venue.value=0">
-			<div class="form-check">
-				<label class="radio-inline"><input type="radio"  name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="0"></label>
-			</div>
-		</td>
-		<td (click)="venue.value=-1">
-			<div class="form-check">
-				<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="-1"></label>
-			</div>
-		</td>
-	</tr>
-</table>
+<form #f="ngForm">
+	<table>
+		<tr>
+			<th></th>
+			<th class="top">Strongly Prefer</th>
+			<th class="top">Indifferent</th>
+			<th class="top">Would not like this venue</th>
+		</tr>
+		<tr *ngFor="let venue of models">
+			<th>{{venue.name}}</th>
+			<td (click)="venue.value=1">
+				<div class="form-check">
+					<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="1"></label>
+				</div>
+			</td>
+			<td (click)="venue.value=0">
+				<div class="form-check">
+					<label class="radio-inline"><input type="radio"  name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="0"></label>
+				</div>
+			</td>
+			<td (click)="venue.value=-1">
+				<div class="form-check">
+					<label class="radio-inline"><input type="radio" name="venue_{{venue.id}}" [(ngModel)]="venue.value" [value]="-1"></label>
+				</div>
+			</td>
+		</tr>
+	</table>
+</form>

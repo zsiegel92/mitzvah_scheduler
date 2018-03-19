@@ -25,7 +25,7 @@ export class FormComponent implements OnInit {
 		comps: any[];
 
 		step: number;
-		comp;
+		public comp;
 
 
 
