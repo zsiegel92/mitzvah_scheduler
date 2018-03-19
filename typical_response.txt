@@ -7,10 +7,12 @@ hebSchool :
 hebSchoolId : -1
 DOB : 2005-03-19T08:00:00.000Z
 rankings : [{'name': 'Main Sanctuary', 'value': 0, 'id': 0}, {'name': 'Family Minyan', 'value': 0, 'id': 1}, {'name': 'Torah In The Round', 'value': 0, 'id': 2}]
+atVenue : True
 nonDates : []
 accommodation : False
 accommodation_other :
 twin : False
+
 127.0.0.1 - - [19/Mar/2018 07:48:24] "POST /api/submission HTTP/1.1" 200 -
 email : zs@gm.co
 childName : blah
@@ -20,7 +22,24 @@ hebSchool : blah
 hebSchoolId : -1
 DOB : 2005-03-19T08:00:00.000Z
 rankings : [{'name': 'Main Sanctuary', 'value': 0, 'id': 0}, {'name': 'Family Minyan', 'value': 1, 'id': 1}, {'name': 'Torah In The Round', 'value': 0, 'id': 2}]
+atVenue : True
 nonDates : [{'greg': {'year': 2018, 'month': 2, 'day': 24}, 'hyear': 5778, 'hmonth': 12, 'hdate': 9, 'hday': 6, 'hdays_in_month': 29, 'hgregorian': '2018-02-24T08:00:00.000Z', 'hgregorian_eve': '2018-02-23T18:18:15.031Z', 'hdate_str': '9 Adar 5778', 'hdate_str_heb': 'ט\' אדר התשע"ח', 'holidays': [{'date': {'month': 12, 'day': 9, 'year': 5778, 'lat': 0, 'long': 0, 'il': False}, 'desc': ['Shabbat Zachor', 'Shabbos Zachor', 'שבת זכור'], 'USER_EVENT': False, 'LIGHT_CANDLES': False, 'YOM_TOV_ENDS': False, 'CHUL_ONLY': False, 'IL_ONLY': False, 'LIGHT_CANDLES_TZEIS': False}]}, {'greg': {'year': 2018, 'month': 2, 'day': 24}, 'hyear': 5778, 'hmonth': 12, 'hdate': 9, 'hday': 6, 'hdays_in_month': 29, 'hgregorian': '2018-02-24T08:00:00.000Z', 'hgregorian_eve': '2018-02-23T18:18:15.031Z', 'hdate_str': '9 Adar 5778', 'hdate_str_heb': 'ט\' אדר התשע"ח', 'holidays': [{'date': {'month': 12, 'day': 9, 'year': 5778, 'lat': 0, 'long': 0, 'il': False}, 'desc': ['Shabbat Zachor', 'Shabbos Zachor', 'שבת זכור'], 'USER_EVENT': False, 'LIGHT_CANDLES': False, 'YOM_TOV_ENDS': False, 'CHUL_ONLY': False, 'IL_ONLY': False, 'LIGHT_CANDLES_TZEIS': False}]}]
 accommodation : True
 accommodation_other : other info
 twin : True
+
+127.0.0.1 - - [19/Mar/2018 07:48:24] "POST /api/submission HTTP/1.1" 200 -
+email : zs@gm.co
+childName : a;ldjksf
+school : afd
+schoolId : -1
+hebSchool : ;aldskjf
+hebSchoolId : -1
+DOB : 2005-03-19T08:00:00.000Z
+rankings : [{'name': 'Main Sanctuary', 'value': 0, 'id': 0}, {'name': 'Family Minyan', 'value': 0, 'id': 1}, {'name': 'Torah In The Round', 'value': 0, 'id': 2}]
+atVenue : True
+nonDates : []
+accommodation : False
+accommodation_other :
+twin : False
+127.0.0.1 - - [1

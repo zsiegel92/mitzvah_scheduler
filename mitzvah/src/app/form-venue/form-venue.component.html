@@ -26,4 +26,13 @@
 			</td>
 		</tr>
 	</table>
+	<br>
+	Would you like to hold your reception at the same venue where the services are held?
+	<br>
+	<label>
+		<input name="party_at_venue" [(ngModel)]="atVenue" type="radio" [value]="true"> Yes
+	</label>
+	<label>
+		<input name="party_at_venue" [(ngModel)]="atVenue" type="radio" [value]="false"> No
+	</label>
 </form>
