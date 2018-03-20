@@ -46,7 +46,7 @@ export class FormStudentComponent implements OnInit {
 
 
 	prepForm(){
-		this.get_all_schools();
+
 	}
 
   constructor(public formService: FormService,private dataService: DataService) {
@@ -61,6 +61,7 @@ export class FormStudentComponent implements OnInit {
   ngOnInit() {
   	this.model = new DoubleDate();
   	this.model.thirteen_ago();
+  	this.get_all_schools();
   }
 
 }

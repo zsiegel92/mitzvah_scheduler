@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 // import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 
 import { DataService } from '../data.service';
 
@@ -46,14 +47,14 @@ export class FormComponent implements OnInit {
 	submit(){
 		this.comp.syncForm();
 		this.formService.submit();
-
+		this.router.navigate(['/submitted']);
 	}
 
 	invalidform(){
 		return false
 	}
 
-  constructor(private dataService: DataService,private formService: FormService) {
+  constructor(private dataService: DataService,private formService: FormService,private router: Router) {
   	this.step=0;
   }
 

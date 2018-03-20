@@ -20,6 +20,7 @@ import { FormStudentComponent } from './form-student/form-student.component';
 import { FormVenueComponent } from './form-venue/form-venue.component';
 import { FormDateComponent } from './form-date/form-date.component';
 import { FormAccommodationComponent } from './form-accommodation/form-accommodation.component';
+import { SubmittedComponent } from './submitted/submitted.component';
 
 // import * as Hebcal from 'hebcal';
 
@@ -33,7 +34,8 @@ import { FormAccommodationComponent } from './form-accommodation/form-accommodat
     FormStudentComponent,
     FormVenueComponent,
     FormDateComponent,
-    FormAccommodationComponent
+    FormAccommodationComponent,
+    SubmittedComponent
   ],
   imports: [
     BrowserModule,
