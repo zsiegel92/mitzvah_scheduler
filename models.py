@@ -1,5 +1,6 @@
 from dateutil.parser import parse
 from datetime import date
+import json
 
 from database import db
 
@@ -21,8 +22,10 @@ class Student(db.Model):
 	school_id = db.Column(db.Integer,db.ForeignKey('schools.id'))
 	hebSchool_id = db.Column(db.Integer,db.ForeignKey('hebschools.id'))
 	nonDates = db.relationship("NonDate",back_populates="student",uselist=True)
+	birthdayDD =db.Column(db.Text)
+	bmDD = db.Column(db.Text)
 
-	def __init__(self,rankings,schoolId,school,hebSchoolId,hebSchool,DOB,nonDates=[],accommodation=False,**kwargs):
+	def __init__(self,rankings,schoolId,school,hebSchoolId,hebSchool,DOB,DOBdd,BMdd,nonDates=[],accommodation=False, **kwargs):
 		print("KWARGS ARE:")
 		print(kwargs)
 
@@ -33,7 +36,8 @@ class Student(db.Model):
 
 		self.dob=parse(DOB).date()
 
-
+		self.birthdayDD = json.dumps(DOBdd)
+		self.bmDD = json.dumps(BMdd)
 
 
 		self.nonDates=[]

@@ -63,6 +63,13 @@ export class DoubleDate {
     	this.update();
     }
 
+    thirteen_from_now(){
+      var heb = new Hebcal.HDate(new Date(this.greg.year, this.greg.month-1, this.greg.day));
+      var future = new Hebcal.HDate(heb.getDate(),heb.getMonth(),heb.getFullYear() + 13).onOrAfter(6).greg();
+      this.greg={year: future.getFullYear(),month: future.getMonth()+1,day:future.getDate()}
+      this.update();
+    }
+
     copy_dd(other: DoubleDate){
     	this.greg={year: other.greg.year,month: other.greg.month,day:other.greg.day}
     	this.update();
@@ -71,6 +78,10 @@ export class DoubleDate {
     copy_ngb(other: NgbDateStruct){
     	this.greg={year: other.year,month: other.month,day:other.day}
     	this.update();
+    }
+    copy_ngb_ducktype(other: any){
+      this.greg={year: other.year,month: other.month,day:other.day}
+      this.update();
     }
 
     selectThisWeek() {
