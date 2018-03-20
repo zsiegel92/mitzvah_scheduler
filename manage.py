@@ -12,17 +12,21 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def populate():
-	from models import School
-	schools = School.query.all()
-	try:
-		max_id = max([school.id for school in schools])
-	except:
-		max_id="00"
-	school = School(name='school_'+str(max_id))
-	db.session.add(school)
+	from models import School,HebSchool
+	names = ['Lainer School']
+	for name in names:
+		school = School.query.filter_by(name=name).first()
+		if school is None:
+			school = School(name=name)
+		db.session.add(school)
 	db.session.commit()
-
-
+	hNames = ["Temple Isaiah"]
+	for name in hNames:
+		school = HebSchool.query.filter_by(name=name).first()
+		if school is None:
+			school = HebSchool(name=name)
+		db.session.add(school)
+	db.session.commit()
 @manager.command
 def delete_all():
 	from models import School,Student
