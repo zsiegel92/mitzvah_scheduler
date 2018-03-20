@@ -3,7 +3,23 @@
 You entered the following information:
 <div *ngIf="formService.entry">
 	<ul>
-		<li *ngFor="let key of Object.keys(formService.entry)">
+		<li>Email: {{formService.entry['email']}}</li>
+		<li>Student's Name: {{formService.entry['childName']}}</li>
+		<li>School: {{formService.entry['school']}} (id {{formService.entry['schoolId']}})</li>
+		<li>Religious School: {{formService.entry['hebSchool']}} (id {{formService.entry['hebSchoolId']}})</li>
+		<li>Date of Birth: {{formService.entry['DOB'] | date}} ({{formService.entry['DOBdd'].hdate_str}}/{{formService.entry['DOBdd'].hdate_str_heb}})</li>
+		<li>Preferences:
+			<ul>
+				<li *ngFor="let ranking of formService.entry['rankings']">
+					{{ranking['name']}} : {{ranking['value']}}
+				</li>
+			</ul>
+		</li>
+		<li>Want to hold reception at service venue? {{formService.entry['atVenue'] ? "Yes" : "No"}}</li>
+		<li>Plan to have <b>{{formService.entry['over200'] ? "over 200" : "under 200"}}</b> service attendees</li>
+		<li *ngIf="formService.entry['accommodation']">Additional accommodation needed: "{{formService.entry['accommodation_other']}}"</li>
+		<li>Approximate B'nai Mitzvah Date: {{formService.entry['BMdd'].hgregorian | date}} ({{formService.entry['BMdd'].hdate_str}}/{{formService.entry['BMdd'].hdate_str_heb}})</li>
+<!-- 		<li *ngFor="let key of Object.keys(formService.entry)">
 			<div *ngIf="key!='rankings'">
 				{{key}} : {{formService.entry[key]}}
 			</div>
@@ -15,7 +31,8 @@ You entered the following information:
 					</li>
 				</ul>
 			</div>
-		</li>
+		</li> -->
 	</ul>
 </div>
+<hr>
 <app-not-found></app-not-found>
