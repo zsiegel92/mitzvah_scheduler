@@ -35,4 +35,13 @@
 	<label>
 		<input name="party_at_venue" [(ngModel)]="atVenue" type="radio" [value]="false"> No
 	</label>
+	<br>
+	<b>Estimated number of guests:</b>
+	<br>
+	<label>
+		<input name="oversize" [(ngModel)]="over200" type="radio" [value]="false"> Under 200
+	</label>
+	<label>
+		<input name="oversize" [(ngModel)]="over200" type="radio" [value]="true"> Over 200
+	</label>
 </form>

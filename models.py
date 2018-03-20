@@ -17,6 +17,7 @@ class Student(db.Model):
 	ranking_familyMinyan=db.Column(db.Integer())
 	ranking_torahInTheRound=db.Column(db.Integer())
 	atVenue = db.Column(db.Boolean())
+	over200 = db.Column(db.Boolean())
 	accommodation_other = db.Column(db.Text)
 	twin = db.Column(db.Boolean())
 	school_id = db.Column(db.Integer,db.ForeignKey('schools.id'))

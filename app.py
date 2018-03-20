@@ -43,8 +43,6 @@ def get_schools():
 @app.route('/api/submission',methods=['GET', 'POST'])
 def submit():
 	d=request.json
-	#TODO: NONDATES
-	#TODO: intake approx mitzvah date
 	for (k,v) in d.items():
 		print(f'{k} : {v}')
 
