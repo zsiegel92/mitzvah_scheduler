@@ -5,7 +5,7 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 <form #f="ngForm">
 	<div class = "container" >
 		<div class="form-group">
-			<label for="email">Email Address</label>
+			<label for="email"><b>Email Address</b></label>
 			<!-- <input type="text" class="form-control" id="email" required> -->
 			<input required type="email" name="email" class="form-control" [(ngModel)]="formService.entry.email" #userEmail="ngModel" placeholder="Please enter a valid email address <address>@<domain>.<extension>" autocomplete='email' email>
 			<div style="color:red;" *ngIf="userEmail.invalid && (userEmail.dirty || userEmail.touched)" class="alert alert-danger">
@@ -14,16 +14,16 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 		</div>
 			<br>
 			<div class="form-group">
-				<label for="name">Child's Name</label>
+				<label for="name"><b>Child's Name</b></label>
 				<input required type="text" name="childname" class="form-control" placeholder="Your child's name" [(ngModel)]="formService.entry.childName">
 			</div>
 			<br>
 			<div class="form-group" >
-				<label for="ac_school">Academic School</label>
+				<label for="ac_school"><b>Academic School</b></label>
 				<div *ngIf="all_schools.schools?.length">
 					<div *ngFor="let school of all_schools.schools">
 						<label>
-							<input  name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="school">{{school.name}}
+							<input  name="ac_school" type="radio" [(ngModel)]="selectedSchool" [value]="school"> {{school.name}}
 						</label>
 						<br>
 					</div>
@@ -40,11 +40,11 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 			</div>
 			<br>
 			<div class="form-group" >
-				<label for="heb_school">Religious School</label>
+				<label for="heb_school"><b>Religious School</b></label>
 				<div *ngIf="all_schools.hebSchools?.length">
 					<div *ngFor="let school of all_schools.hebSchools">
 						<label>
-							<input name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="school">{{school.name}}
+							<input name="heb_school" type="radio" [(ngModel)]="selectedHebSchool" [value]="school"> {{school.name}}
 						</label>
 						<br>
 					</div>
@@ -57,7 +57,7 @@ For assistance submitting this information, please contact [CONTACT EMAIL FOR PL
 				</div>
 			</div>
 			<br>
-			Date of Birth:
+			<b>Date of Birth</b>
 			<br>
 			<div style="display:flex; flex-flow: row wrap;">
 				<div style="flex:1; flex-basis: 25%;">
