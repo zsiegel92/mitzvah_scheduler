@@ -1,8 +1,12 @@
 from flask import Flask,jsonify, request
+from dateutil.parser import parse
+from datetime import date
+# If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
+# otherwise use request.get_json()
 import os
 
 from database import db
-from models import School, HebSchool
+from models import School, HebSchool, Student,NonDate
 
 app = Flask(__name__,static_folder='mitzvah/static')
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -38,10 +42,50 @@ def get_schools():
 
 @app.route('/api/submission',methods=['GET', 'POST'])
 def submit():
-	# If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
-	# otherwise use request.get_json()
-	for (k,v) in request.json.items():
+	d=request.json
+	#TODO: NONDATES
+	#TODO: intake approx mitzvah date
+	for (k,v) in d.items():
 		print(f'{k} : {v}')
+
+	# s = Student(email=d['email'],childName=d['childName'], atVenue = d['atVenue'], accommodation_other = d['accommodation_other'], twin = d['twin'],rankings=d['rankings'],schoolId=d['schoolId'],hebSchoolId=d['hebSchoolId'],school=d['school'],hebSchool=d['hebSchool'],DOB=d['DOB'])
+	s= Student(**d)
+	db.session.add(s)
+	# db.session.flush()
+	# db.session.refresh(s)
+	db.session.commit()
+	# db.session.add(s)
+	nonDates=d['nonDates']
+	for nonDate in nonDates:
+		greg = nonDate['greg']
+		gdate = date(greg['year'],greg['month'],greg['day'])
+		nd = NonDate(greg=gdate)
+
+		nd.student_id = s.id
+		s.nonDates.append(nd)
+		nd.student=s
+		print("APPENDING non-DATE")
+		print(f"student_id is: {s.id}")
+		db.session.add(nd)
+
+	sch = School.query.filter_by(id=d['schoolId']).first()
+	if sch is None:
+		sch = School()
+		sch.name = d['school']
+		db.session.add(sch)
+		db.session.commit()
+		sch.students.append(s)
+	else:
+		sch.students.append(s)
+	hSch = HebSchool.query.filter_by(id=d['hebSchoolId']).first()
+	if hSch is None:
+		hSch = HebSchool()
+		hSch.name = d['hebSchool']
+		db.session.add(hSch)
+		hSch.students.append(s)
+	else:
+		hSch.students.append(s)
+	db.session.commit()
 	return jsonify({"resp":"good!"}), 200
 
 

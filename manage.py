@@ -23,5 +23,12 @@ def populate():
 	db.session.commit()
 
 
+@manager.command
+def delete_all():
+	from models import School,Student
+	for s in Student.query.all():
+	 	db.session.delete(s)
+	db.session.commit()
+
 if __name__ == '__main__':
 	manager.run()
