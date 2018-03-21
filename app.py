@@ -1,7 +1,8 @@
-from flask import Flask,jsonify, request
+from flask import Flask,jsonify, request,make_response
 from dateutil.parser import parse
 from datetime import date
 import json
+import io, csv
 # If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
 # otherwise use request.get_json()
 import os
@@ -138,13 +139,7 @@ def submit():
 #		nd.hdate_str_heb
 @app.route("/api/submissions",methods=["GET","POST"])
 def get_submissions():
-	print(request.headers)
-	for i in range(0,10):
-		print("GETTING SUBMISSIONS")
-	print(request.json)
 	subs = []
-	print("SUBMITTED CODE: " + request.json.get('code'))
-	print("SUBMITTED CODE: " + app.config['ADMIN_CODE'])
 	if request.json.get('code')==app.config['ADMIN_CODE']:
 		students = Student.query.all()
 		for student in students:
@@ -179,6 +174,48 @@ def get_submissions():
 			}
 			subs.append(d)
 		return  jsonify(subs),200
+	else:
+		return jsonify(subs),401
+
+# retreived:
+# 	subs['DOB'] | date
+# 	subs['DOBdd'].hdate_str
+# 	subs['DOBdd'].hdate_str_heb
+# 	subs['BMdd'].hgregorian | date
+# 	subs['BMdd'].hdate_str
+# 	subs['BMdd'].hdate_str_heb
+#	let nd of subs['nonDates']
+# 		nd.hgregorian | date
+# 		nd.hdate_str
+#		nd.hdate_str_heb
+@app.route("/api/submissions_csv",methods=["GET","POST"])
+def get_submissions_csv():
+	subs = []
+	if request.json.get('code')==app.config['ADMIN_CODE']:
+		students = Student.query.all()
+		for student in students:
+			nds = [nd.greg.strftime('%m/%d/%Y') for nd in student.nonDates]
+			DOB = student.dob
+			DOBdd = json.loads(student.birthdayDD)
+			BMdd = json.loads(student.bmDD)
+
+			a_row = [student.email, student.childName, DOB.strftime('%m/%d/%Y') + " (" + DOBdd.hdate_str + "/" + DOBdd.hdate_str_heb + ")", student.school.name, student.hebSchool.name, student.atVenue, student.over200, student.twin, student.accommodation_other,]
+
+			a_row.append(parse(BMdd['hgregorian']).strftime('%m/%d/%Y') +  " (" + BMdd.hdate_str + "/" + BMdd.hdate_str_heb + ")")
+
+			a_row.append("Main: {}, Family Minyan: {}, Torah in the Round: {}".format(student.ranking_main,student.ranking_familyMinyan,student.ranking_torahInTheRound))
+			a_row.append(", ".join(nds))
+			subs.append(a_row)
+		headers = ["Email","Child Name", "Date of Birth", "School", "Religious School","Reception at Services Venue?","Over 200 guests?", "Is a twin?", "Additional Accommodation","Approximate BM Date","Venue Rankings","Dates Unavailable"]
+		dest = io.StringIO()
+		writer = csv.writer(dest)
+		writer.writerow(headers)
+		for row in subs:
+		    writer.writerow(row)
+		output = make_response(dest.getvalue(),200)
+		output.headers["Content-Disposition"] = "attachment; filename=mitzvah_students.csv"
+		output.headers["Content-type"] = "text/csv"
+		return output
 	else:
 		return jsonify(subs),401
 
