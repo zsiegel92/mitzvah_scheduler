@@ -1,3 +1,78 @@
-code: {{code }}
-<br>
-submissions: {{submissions | json}}
+<div *ngIf="!(submissions?.length >0)">
+	<b style="color:red;">
+	Note: If no submissions are visible, you must obtain the access code and append it to the URL.
+	</b>
+	<br>
+	The URL should appear as:
+	<code>{{base_url}}/submissions/something</code>
+	where <code>something</code> is provided by the administrator.
+</div>
+<div *ngIf="submissions?.length >0">
+	<b style="color:red;">
+	Note: you must re-enter the access code into the URL of this page every time you refresh the page.
+	</b>
+	<br>
+	(<code>{{base_url}}/submissions/something</code>
+	where <code>something</code> is provided by the administrator.)
+</div>
+<h4>Student Submissions:</h4>
+<div style="overflow-x:auto;">
+	<table *ngIf="submissions?.length >0">
+		<tr>
+			<th>Name</th>
+			<th>Email</th>
+			<th>School</th>
+			<th>Religious School</th>
+			<th>DOB</th>
+			<th>Approximate BM Date</th>
+			<th>Venue Preferences</th>
+			<th>Services at Venue?</th>
+			<th># Guests</th>
+			<th>Dates Unavailable</th>
+			<th>Additional Accommodation</th>
+		</tr>
+		<tr *ngFor="let submission of submissions">
+			<td>
+				{{submission['childName']}}
+			</td>
+			<td>
+				{{submission['email']}}
+			</td>
+			<td>
+				{{submission['school']}} (id {{submission['schoolId']}})
+			</td>
+			<td>
+				{{submission['hebSchool']}} (id {{submission['hebSchoolId']}})
+			</td>
+			<td>
+				{{submission['DOB'] | date}} ({{submission['DOBdd'].hdate_str}}/{{submission['DOBdd'].hdate_str_heb}})
+			</td>
+			<td>
+				{{submission['BMdd'].hgregorian | date}} ({{submission['BMdd'].hdate_str}}/{{submission['BMdd'].hdate_str_heb}})
+			</td>
+			<td>
+				<ul>
+					<li *ngFor="let ranking of submission['rankings']">
+						{{ranking['name']}} : {{ranking['value']}}
+					</li>
+				</ul>
+			</td>
+			<td>
+				{{submission['atVenue'] ? "Yes" : "No"}}
+			</td>
+			<td>
+				{{submission['over200'] ? "over 200" : "under 200"}}
+			</td>
+			<td>
+				<ul>
+					<li *ngFor="let nd of submission['nonDates']">
+						{{nd.hgregorian | date}} ({{nd.hdate_str}}/{{nd.hdate_str_heb}})
+					</li>
+				</ul>
+			</td>
+			<td>
+				{{submission['accommodation_other']}}
+			</td>
+		</tr>
+	</table>
+</div>

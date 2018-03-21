@@ -71,7 +71,8 @@ export class DoubleDate {
     }
 
     copy_dd(other: DoubleDate){
-    	this.greg={year: other.greg.year,month: other.greg.month,day:other.greg.day}
+    	this.greg={...other.greg};
+      // this.greg = JSON.parse(JSON.stringify(other.greg));
     	this.update();
     }
 

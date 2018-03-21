@@ -10,7 +10,7 @@ class Student(db.Model):
 	id = db.Column(db.Integer(),primary_key=True)
 	school = db.relationship("School",back_populates ="students",uselist=False)
 	hebSchool = db.relationship("HebSchool",back_populates ="students",uselist=False) #way to make non-list?
-	dob  = db.Column(db.DateTime())
+	dob  = db.Column(db.Date())
 	email=db.Column(db.String())
 	childName=db.Column(db.String())
 	ranking_main=db.Column(db.Integer())
@@ -27,8 +27,6 @@ class Student(db.Model):
 	bmDD = db.Column(db.Text)
 
 	def __init__(self,rankings,schoolId,school,hebSchoolId,hebSchool,DOB,DOBdd,BMdd,nonDates=[],accommodation=False, **kwargs):
-		print("KWARGS ARE:")
-		print(kwargs)
 
 		super(Student, self).__init__(**kwargs)
 		self.ranking_main=rankings[0]['value']
@@ -60,6 +58,8 @@ class NonDate(db.Model):
 	__tablename__="nondates"
 	id = db.Column(db.Integer, primary_key=True,autoincrement=True)
 	greg = db.Column(db.Date())
+	hdate_str = db.Column(db.String())
+	hdate_str_heb = db.Column(db.String())
 	student = db.relationship("Student",uselist=False)
 	student_id = db.Column(db.Integer,db.ForeignKey('students.id'))
 	# parent_id = db.Column(db.Integer,db.ForeignKey("nondates.id"),nullable=True)

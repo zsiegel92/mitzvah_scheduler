@@ -8,6 +8,7 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET_KEY = 'this-really-needs-to-be-changed'
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    ADMIN_CODE=os.environ['ADMIN_CODE']
 
 
 class ProductionConfig(Config):

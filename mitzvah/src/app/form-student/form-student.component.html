@@ -62,7 +62,7 @@
 						<div>
 							<b>{{model.hdate_str}} -- {{model.hdate_str_heb}}</b>
 							<br>
-							<ngb-datepicker #dp name="birthDate" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate" [startDate]="model.getGreg()"></ngb-datepicker>
+							<ngb-datepicker #dp name="birthDate" [(ngModel)]="model.greg" outsideDays="hidden" (select)="model.update()" [minDate]="minDate" [maxDate]="maxDate" [startDate]="model.getGreg()" (navigate)="dp.focus()"></ngb-datepicker>
 							<br><br>
 							<div>
 								<button class="btn btn-sm btn-outline-info" (click)="model.thirteen_ago(); dp.navigateTo({ year: model.greg.year, month: model.greg.month})">

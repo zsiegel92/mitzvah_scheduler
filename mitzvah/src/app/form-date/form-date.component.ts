@@ -23,7 +23,7 @@ export class FormDateComponent implements OnInit {
 	maxDate: NgbDateStruct;
 	minDate: NgbDateStruct;
 	have_birthday: boolean = false;
-
+	pushed: boolean = false;
 
 	// dps_info(){
 	// 	// this.messageService.add('new DP: ' + dd.hgregorian);
@@ -45,6 +45,7 @@ export class FormDateComponent implements OnInit {
 			}
 		}
 	  this.models.push(dd);
+	  this.pushed=true;
 	}
 
 	pop_date(i: number) {

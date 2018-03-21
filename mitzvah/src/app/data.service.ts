@@ -76,8 +76,8 @@ export class DataService {
 			  );
 	}
 
-	getSubmissions(code: any): Observable<any[]> {
-		return this.http.post<any[]>(this.getSubmissionsURL,code,httpOptions);
+	getSubmissions(code: any): Observable<any> {
+		return this.http.post<any>(this.getSubmissionsURL,{'code':code},httpOptions);
 	}
 
 	/**

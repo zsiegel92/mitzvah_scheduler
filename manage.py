@@ -34,12 +34,22 @@ def populate():
 		db.session.add(school)
 	db.session.commit()
 
+
 @manager.command
 def delete_all():
 	# from models import School,Student
 	for s in Student.query.all():
-	 	db.session.delete(s)
+		db.session.delete(s)
 	db.session.commit()
+
+@manager.command
+def dt_to_date():
+	# from models import School,Student
+	for s in Student.query.all():
+		s.dob = s.dob.date()
+		db.session.add(s)
+	db.session.commit()
+
 
 if __name__ == '__main__':
 	manager.run()
