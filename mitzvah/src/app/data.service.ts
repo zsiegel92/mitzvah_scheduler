@@ -19,6 +19,7 @@ export class DataService {
 	private schoolsURL = 'api/schools';  // URL to web api
 	private hebSchoolsURL = 'api/hebschools';  // URL to web api
 	private submissionsURL = 'api/submission';
+	private getSubmissionsURL = 'api/submissions';
 
 	/** GET schools from the server */
 	getSchools (): Observable<School[]> {
@@ -75,6 +76,9 @@ export class DataService {
 			  );
 	}
 
+	getSubmissions(code: any): Observable<any[]> {
+		return this.http.post<any[]>(this.getSubmissionsURL,code,httpOptions);
+	}
 
 	/**
 	 * Handle Http operation that failed.

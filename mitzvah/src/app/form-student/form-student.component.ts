@@ -4,7 +4,6 @@ import { FormsModule,NgForm } from '@angular/forms';
 
 import { DoubleDate } from '../DoubleDate';
 import { School } from '../school';
-import { DataService } from '../data.service';
 import { FormService } from '../form.service';
 
 const now = new Date();
@@ -49,7 +48,7 @@ export class FormStudentComponent implements OnInit {
 
 	}
 
-  constructor(public formService: FormService,private dataService: DataService) {
+  constructor(public formService: FormService) {
     this.maxDate = {year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate()};
   	this.minDate = {year: now.getFullYear() - 15, month: now.getMonth() + 1, day: now.getDate()};
   	this.otherSchool = new School();

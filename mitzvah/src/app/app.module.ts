@@ -21,6 +21,7 @@ import { FormVenueComponent } from './form-venue/form-venue.component';
 import { FormDateComponent } from './form-date/form-date.component';
 import { FormAccommodationComponent } from './form-accommodation/form-accommodation.component';
 import { SubmittedComponent } from './submitted/submitted.component';
+import { SubmissionsComponent } from './submissions/submissions.component';
 
 // import * as Hebcal from 'hebcal';
 
@@ -35,7 +36,8 @@ import { SubmittedComponent } from './submitted/submitted.component';
     FormVenueComponent,
     FormDateComponent,
     FormAccommodationComponent,
-    SubmittedComponent
+    SubmittedComponent,
+    SubmissionsComponent
   ],
   imports: [
     BrowserModule,

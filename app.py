@@ -123,6 +123,10 @@ def add_school():
 def add_hebschool():
 	pass
 
+@app.route("/api/submissions",methods=["GET","POST"])
+def get_submissions():
+	return  jsonify([{"submissions":"some submissions!"}]),200
+
 # # error handlers
 # @app.errorhandler(404)
 # def page_not_found(e):
