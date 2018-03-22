@@ -83,8 +83,8 @@ export class FormDateComponent implements OnInit {
 
 
   constructor(private formService: FormService,private messageService: MessageService) {
-  	this.maxDate = {year: now.getFullYear() + 2, month: now.getMonth() + 1, day: now.getDate()};
-  	this.minDate = {year: now.getFullYear() - 1, month: now.getMonth() + 1, day: now.getDate()};
+  	this.maxDate = {year: now.getFullYear() + 5, month: now.getMonth() + 1, day: now.getDate()};
+  	this.minDate = {year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate()};
   }
 
   ngOnInit() {

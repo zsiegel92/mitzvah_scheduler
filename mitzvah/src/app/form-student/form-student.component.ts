@@ -49,7 +49,7 @@ export class FormStudentComponent implements OnInit {
 	}
 
   constructor(public formService: FormService) {
-    this.maxDate = {year: now.getFullYear() + 1, month: now.getMonth() + 1, day: now.getDate()};
+    this.maxDate = {year: now.getFullYear()-5, month: now.getMonth() + 1, day: now.getDate()};
   	this.minDate = {year: now.getFullYear() - 15, month: now.getMonth() + 1, day: now.getDate()};
   	this.otherSchool = new School();
   	this.otherHebSchool = new School();
