@@ -5,15 +5,23 @@ import json
 import io, csv
 # If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
 # otherwise use request.get_json()
-import os
+from rq import Queue
+from rq.job import Job
 
+from worker import conn
+from app_factory import create_app
 from database import db
 from models import School, HebSchool, Student,NonDate
+from emailer import Emailer
 
-app = Flask(__name__,static_folder='mitzvah/static')
-app.config.from_object(os.environ['APP_SETTINGS'])
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+q = Queue(connection=conn)
+emailer=Emailer(q)
+
+# app = Flask(__name__,static_folder='mitzvah/static')
+# app.config.from_object(os.environ['APP_SETTINGS'])
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db.init_app(app)
+app = create_app(__name__)
 
 def pre_dict(queries):
 	return list(map(lambda x: x.to_dict(),queries))
