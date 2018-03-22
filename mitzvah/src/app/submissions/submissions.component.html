@@ -1,13 +1,13 @@
-<div *ngIf="!(submissions?.length >0)">
+<div *ngIf="!code_accepted">
 	<b style="color:red;">
-	Note: If no submissions are visible, you must obtain the access code and append it to the URL.
+	Note: If the submissions table is not visible, you must obtain the access code and append it to the URL.
 	</b>
 	<br>
 	The URL should appear as:
 	<code>{{base_url}}/submissions/something</code>
 	where <code>something</code> is provided by the administrator.
 </div>
-<div *ngIf="submissions?.length >0">
+<div *ngIf="code_accepted">
 	<b style="color:red;">
 	Note: you must re-enter the access code into the URL of this page every time you refresh the page.
 	</b>
@@ -15,12 +15,11 @@
 	(<code>{{base_url}}/submissions/something</code>
 	where <code>something</code> is provided by the administrator.)
 </div>
-<h4>Student Submissions:</h4>
-DOWNLOAD AS CSV
-
-
-<div style="overflow-x:auto;">
-	<table *ngIf="submissions?.length >0">
+<h4>Student Submissions:
+<a *ngIf="code_accepted" target="_self" href="/api/submissions_csv/{{code}}" download="students.csv"><button class="btn btn-primary btn-sm">DOWNLOAD AS CSV</button></a>
+</h4>
+<div *ngIf="code_accepted" style="overflow-x:auto;">
+	<table>
 		<tr>
 			<th>Name</th>
 			<th>Email</th>
@@ -54,11 +53,10 @@ DOWNLOAD AS CSV
 				{{submission['BMdd'].hgregorian | date}} ({{submission['BMdd'].hdate_str}}/{{submission['BMdd'].hdate_str_heb}})
 			</td>
 			<td>
-				<ul>
-					<li *ngFor="let ranking of submission['rankings']">
+					<div *ngFor="let ranking of submission['rankings'];let last = last;">
 						{{ranking['name']}} : {{ranking['value']}}
-					</li>
-				</ul>
+						<br *ngIf="!last">
+					</div>
 			</td>
 			<td>
 				{{submission['atVenue'] ? "Yes" : "No"}}
@@ -67,11 +65,10 @@ DOWNLOAD AS CSV
 				{{submission['over200'] ? "over 200" : "under 200"}}
 			</td>
 			<td>
-				<ul>
-					<li *ngFor="let nd of submission['nonDates']">
+					<div *ngFor="let nd of submission['nonDates']; let last=last;">
 						{{nd.hgregorian | date}} ({{nd.hdate_str}}/{{nd.hdate_str_heb}})
-					</li>
-				</ul>
+						<br *ngIf="!last">
+					</div>
 			</td>
 			<td>
 				{{submission['accommodation_other']}}

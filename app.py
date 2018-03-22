@@ -188,10 +188,10 @@ def get_submissions():
 # 		nd.hgregorian | date
 # 		nd.hdate_str
 #		nd.hdate_str_heb
-@app.route("/api/submissions_csv",methods=["GET","POST"])
-def get_submissions_csv():
+@app.route("/api/submissions_csv/<code>",methods=["GET"])
+def get_submissions_csv(code):
 	subs = []
-	if request.json.get('code')==app.config['ADMIN_CODE']:
+	if code==app.config['ADMIN_CODE']:
 		students = Student.query.all()
 		for student in students:
 			nds = [nd.greg.strftime('%m/%d/%Y') for nd in student.nonDates]
@@ -199,9 +199,9 @@ def get_submissions_csv():
 			DOBdd = json.loads(student.birthdayDD)
 			BMdd = json.loads(student.bmDD)
 
-			a_row = [student.email, student.childName, DOB.strftime('%m/%d/%Y') + " (" + DOBdd.hdate_str + "/" + DOBdd.hdate_str_heb + ")", student.school.name, student.hebSchool.name, student.atVenue, student.over200, student.twin, student.accommodation_other,]
+			a_row = [student.email, student.childName, DOB.strftime('%m/%d/%Y') + " (" + DOBdd['hdate_str'] + "/" + DOBdd['hdate_str_heb'] + ")", student.school.name, student.hebSchool.name, student.atVenue, student.over200, student.twin, student.accommodation_other,]
 
-			a_row.append(parse(BMdd['hgregorian']).strftime('%m/%d/%Y') +  " (" + BMdd.hdate_str + "/" + BMdd.hdate_str_heb + ")")
+			a_row.append(parse(BMdd['hgregorian']).strftime('%m/%d/%Y') +  " (" + BMdd['hdate_str'] + "/" + BMdd['hdate_str_heb'] + ")")
 
 			a_row.append("Main: {}, Family Minyan: {}, Torah in the Round: {}".format(student.ranking_main,student.ranking_familyMinyan,student.ranking_torahInTheRound))
 			a_row.append(", ".join(nds))

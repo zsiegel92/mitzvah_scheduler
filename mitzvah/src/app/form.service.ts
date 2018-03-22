@@ -30,7 +30,7 @@ export class FormService implements OnInit {
 	  	      });
 	}
 	submit(){
-		this.entry.DOBdd.copy_ngb_ducktype({'year': this.entry.DOB.getFullYear(),'month':this.entry.DOB.getMonth(),'day':this.entry.DOB.getDate()});
+		this.entry.DOBdd = this.birthday;
 		this.entry.BMdd.copy_dd(this.entry.DOBdd);
 		this.entry.BMdd.thirteen_from_now();
 		this.dataService.submit(this.entry).subscribe();

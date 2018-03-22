@@ -16,6 +16,7 @@ export class SubmissionsComponent implements OnInit {
 	submissions: any[] = [];
   base_url: string = "";
   full_url: string = "";
+  code_accepted: boolean = false;
 
   constructor(@Inject(DOCUMENT) document: any, private route: ActivatedRoute,private router: Router,private location: Location,private dataService: DataService) {
   	// this.document = document;
@@ -25,7 +26,10 @@ export class SubmissionsComponent implements OnInit {
 
 
   getSubmissions(){
-  	this.dataService.getSubmissions(this.code).subscribe(submissions => this.submissions = submissions);
+  	this.dataService.getSubmissions(this.code).subscribe(submissions => {
+  		this.submissions = submissions;
+  		this.code_accepted = true;
+  	});
   }
 
   blank_route(){
