@@ -1,0 +1,29 @@
+Hey, {{student.email}},
+<br>
+<br>
+<a href={{url_for('index')}}>Mitzvah Scheduler</a> has just received thee following information regarding {{student.name}}:
+<ul>
+	<li>Name: {{student.email}}</li>
+	<li>School: {{student.school.name}}</li>
+	<li>Religious School: {{student.hebSchool.name}}</li>
+	<li>DOB: {{student.birthday_dd_str()}}</li>
+	<li>Approximate BM Date: {{student.approx_bm_dd_str()}}</li>
+	<li>
+		Venue Preferences:
+		<ul>
+			<li>
+				Main Sanctuary: {{student.ranking_main | ranking}}
+			</li>
+			<li>
+				Family Minyan: {{student.ranking_familyMinyan | ranking}}
+			</li>
+			<li>
+				Torah in the Round: {{student.ranking_torahInTheRound | ranking}}
+			</li>
+		</ul>
+	</li>
+	<li>Services at Venue?: {{"Yes" if student.atVenue else "No"}}</li>
+	<li># Guests: {{"Over 200" if student.over200 else "Under 200"}}</li>
+	<li>Dates Unavailable: {{student.non_date_string()}}</li>
+	<li>Additional Accommodation: '{{student.accommodation_other}}'</li>
+</ul>

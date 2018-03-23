@@ -1,7 +1,6 @@
-from flask import Flask,jsonify, request,make_response
+from flask import Flask,jsonify, request,make_response,render_template
 from dateutil.parser import parse
 from datetime import date
-import json
 import io, csv
 # If the mimetype is application/json, request.json will contain the parsed JSON data. Otherwise this will be None.
 # otherwise use request.get_json()
@@ -28,19 +27,19 @@ def pre_dict(queries):
 
 # @app.route("/")
 # def index():
-# 	# return "hello"
-# 	return app.send_static_file('index.html')
+#   # return "hello"
+#   return app.send_static_file('index.html')
 
 # Program catch-all for routes to send the static index.html file to the current app
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def index(path):
-	return app.send_static_file('index.html')
+# @app.route('/', defaults={'path': ''})
+# @app.route('/<path:path>')
+# def index(path=''):
+# 	return app.send_static_file('index.html')
 
 # @app.route('/<path:path>')
 # def static_proxy(path):
-# 	# send_static_file will guess the correct MIME type
-# 	return app.send_static_file(path)
+#   # send_static_file will guess the correct MIME type
+#   return app.send_static_file(path)
 
 @app.route("/api/schools/")
 def get_schools():
@@ -85,6 +84,12 @@ def add_school():
 @app.route("/api/hebschools/add")
 def add_hebschool():
 	pass
+
+# @app.route('/test_email')
+# def test_email():
+# 	s=Student.query.filter_by(email="zsiegel92@gmail.com").first()
+# 	q.enqueue_call(func=send_submission_email,kwargs = {'student_id':s.id},result_ttl=5000)
+# 	return jsonify({}),200
 
 @app.route('/api/submission',methods=['GET', 'POST'])
 def submit():
@@ -131,110 +136,81 @@ def submit():
 	else:
 		hSch.students.append(s)
 	db.session.commit()
+	q.enqueue_call(func=send_submission_email,kwargs = {'student_id':s.id},result_ttl=5000)
 	return jsonify({"resp":"good!"}), 200
 
 
+def send_submission_email(student_id):
+	s = Student.query.filter_by(id=student_id).first()
+	if s is None:
+		return
+	subject = "B'nai Mitzvah information received"
+	html_body = render_template('emails/submission.html',student=s)
+	text_message = html_body
+	html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+	emailer.send_html(s.email,html_message=html,subject=subject,text_message=text_message)
+
 # Fields called in submission.component.html:
-# 	formService.entry['DOB'] | date
-# 	formService.entry['DOBdd'].hdate_str
-# 	formService.entry['DOBdd'].hdate_str_heb
-# 	formService.entry['BMdd'].hgregorian | date
-# 	formService.entry['BMdd'].hdate_str
-# 	formService.entry['BMdd'].hdate_str_heb
-#	let nd of formService.entry['nonDates']
-# 		nd.hgregorian | date
-# 		nd.hdate_str
-#		nd.hdate_str_heb
+#   formService.entry['DOB'] | date
+#   formService.entry['DOBdd'].hdate_str
+#   formService.entry['DOBdd'].hdate_str_heb
+#   formService.entry['BMdd'].hgregorian | date
+#   formService.entry['BMdd'].hdate_str
+#   formService.entry['BMdd'].hdate_str_heb
+#   let nd of formService.entry['nonDates']
+#       nd.hgregorian | date
+#       nd.hdate_str
+#       nd.hdate_str_heb
 @app.route("/api/submissions",methods=["GET","POST"])
 def get_submissions():
-	subs = []
 	if request.json.get('code')==app.config['ADMIN_CODE']:
 		students = Student.query.all()
-		for student in students:
-			nds=[{'hgregorian':nd.greg,'hdate_str':nd.hdate_str,'hdate_str_heb':nd.hdate_str_heb} for nd in student.nonDates]
-			d = {'email': student.email,
-			'childName':student.childName,
-			'school':student.school.name,
-			'schoolId':student.school.id,
-			'hebSchool':student.hebSchool.name,
-			'hebSchoolId':student.hebSchool.id,
-			'DOB':student.dob,
-			'DOBdd':json.loads(student.birthdayDD),
-			'BMdd':json.loads(student.bmDD),
-			'rankings':[{
-			      'name': "Main Sanctuary",
-			      'value': student.ranking_main
-			    },
-			    {
-			      'name': "Family Minyan",
-			      'value': student.ranking_familyMinyan
-			    },
-			    {
-			      'name': "Torah In The Round",
-			      'value': student.ranking_torahInTheRound
-			    }],
-			 'atVenue':student.atVenue,
-			 'over200':student.over200,
-			 'nonDates':nds,
-			 'accommodation':student.accommodation_other != '',
-			 'accommodation_other':student.accommodation_other,
-			 'twin':student.twin,
-			}
-			subs.append(d)
-		return  jsonify(subs),200
+		subs = [student.to_dict() for student in students]
+		status = 200
 	else:
-		return jsonify(subs),401
+		subs = []
+		status = 401
+	return jsonify(subs),status
 
 # retreived:
-# 	subs['DOB'] | date
-# 	subs['DOBdd'].hdate_str
-# 	subs['DOBdd'].hdate_str_heb
-# 	subs['BMdd'].hgregorian | date
-# 	subs['BMdd'].hdate_str
-# 	subs['BMdd'].hdate_str_heb
-#	let nd of subs['nonDates']
-# 		nd.hgregorian | date
-# 		nd.hdate_str
-#		nd.hdate_str_heb
+#   subs['DOB'] | date
+#   subs['DOBdd'].hdate_str
+#   subs['DOBdd'].hdate_str_heb
+#   subs['BMdd'].hgregorian | date
+#   subs['BMdd'].hdate_str
+#   subs['BMdd'].hdate_str_heb
+#   let nd of subs['nonDates']
+#       nd.hgregorian | date
+#       nd.hdate_str
+#       nd.hdate_str_heb
 @app.route("/api/submissions_csv/<code>",methods=["GET"])
 def get_submissions_csv(code):
-	subs = []
 	if code==app.config['ADMIN_CODE']:
 		students = Student.query.all()
-		for student in students:
-			nds = [nd.greg.strftime('%m/%d/%Y') for nd in student.nonDates]
-			DOB = student.dob
-			DOBdd = json.loads(student.birthdayDD)
-			BMdd = json.loads(student.bmDD)
-
-			a_row = [student.email, student.childName, DOB.strftime('%m/%d/%Y') + " (" + DOBdd['hdate_str'] + "/" + DOBdd['hdate_str_heb'] + ")", student.school.name, student.hebSchool.name, student.atVenue, student.over200, student.twin, student.accommodation_other,]
-
-			a_row.append(parse(BMdd['hgregorian']).strftime('%m/%d/%Y') +  " (" + BMdd['hdate_str'] + "/" + BMdd['hdate_str_heb'] + ")")
-
-			a_row.append("Main: {}, Family Minyan: {}, Torah in the Round: {}".format(student.ranking_main,student.ranking_familyMinyan,student.ranking_torahInTheRound))
-			a_row.append(", ".join(nds))
-			subs.append(a_row)
+		subs = [student.to_csv_row() for student in students]
 		headers = ["Email","Child Name", "Date of Birth", "School", "Religious School","Reception at Services Venue?","Over 200 guests?", "Is a twin?", "Additional Accommodation","Approximate BM Date","Venue Rankings","Dates Unavailable"]
 		dest = io.StringIO()
 		writer = csv.writer(dest)
 		writer.writerow(headers)
 		for row in subs:
-		    writer.writerow(row)
+			writer.writerow(row)
 		output = make_response(dest.getvalue(),200)
 		output.headers["Content-Disposition"] = "attachment; filename=mitzvah_students.csv"
 		output.headers["Content-type"] = "text/csv"
-		return output
 	else:
-		return jsonify(subs),401
+		output = make_response(jsonify([]),401)
+
+	return output
+
 
 # # error handlers
 # @app.errorhandler(404)
 # def page_not_found(e):
-# 	return render_template('404.html'), 404
+#   return render_template('404.html'), 404
 
 # @app.route('/favicon.ico')
 # def favicon():
-# 	return send_static_file('favicon.ico')
+#   return send_static_file('favicon.ico')
 
 
 if __name__=="__main__":

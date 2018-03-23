@@ -52,7 +52,55 @@ class Student(db.Model):
 		# 	db.session.add(nd)
 		# gregs=[nonDate['greg'] for nonDate in nonDates]
 		# self.nonDates=NonDate.cls_construct(gregs)
+	def approx_bm_dd_str(self):
+		BMdd=json.loads(self.bmDD)
+		return parse(BMdd['hgregorian']).strftime('%m/%d/%Y') +  " (" + BMdd['hdate_str'] + "/" + BMdd['hdate_str_heb'] + ")"
+	def birthday_dd_str(self):
+		DOBdd=json.loads(self.birthdayDD)
+		return self.dob.strftime('%m/%d/%Y') + " (" + DOBdd['hdate_str'] + "/" + DOBdd['hdate_str_heb'] + ")"
+	def non_date_string(self):
+		nds = [nd.greg.strftime('%m/%d/%Y') for nd in self.nonDates]
+		return ", ".join(nds)
 
+	def to_dict(self):
+		nds=[{'hgregorian':nd.greg,'hdate_str':nd.hdate_str,'hdate_str_heb':nd.hdate_str_heb} for nd in self.nonDates]
+		d = {'email': self.email,
+		'childName':self.childName,
+		'school':self.school.name,
+		'schoolId':self.school.id,
+		'hebSchool':self.hebSchool.name,
+		'hebSchoolId':self.hebSchool.id,
+		'DOB':self.dob,
+		'DOBdd':json.loads(self.birthdayDD),
+		'BMdd':json.loads(self.bmDD),
+		'rankings':[{
+		      'name': "Main Sanctuary",
+		      'value': self.ranking_main
+		    },
+		    {
+		      'name': "Family Minyan",
+		      'value': self.ranking_familyMinyan
+		    },
+		    {
+		      'name': "Torah In The Round",
+		      'value': self.ranking_torahInTheRound
+		    }],
+		 'atVenue':self.atVenue,
+		 'over200':self.over200,
+		 'nonDates':nds,
+		 'accommodation':self.accommodation_other != '',
+		 'accommodation_other':self.accommodation_other,
+		 'twin':self.twin,
+		}
+		return d
+
+	def to_csv_row(self):
+		a_row = [self.email, self.childName, self.birthday_dd_str(), self.school.name, self.hebSchool.name, self.atVenue, self.over200, self.twin, self.accommodation_other,]
+
+		a_row.append(self.approx_bm_dd_str())
+		a_row.append("Main: {}, Family Minyan: {}, Torah in the Round: {}".format(self.ranking_main,self.ranking_familyMinyan,self.ranking_torahInTheRound))
+		a_row.append(self.non_date_string())
+		return a_row
 
 class NonDate(db.Model):
 	__tablename__="nondates"
