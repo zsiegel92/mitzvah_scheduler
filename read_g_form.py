@@ -7,7 +7,7 @@ from convertdate import hebrew
 import pulp
 
 heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','nondate1','nondate2','nondate3','nondate4','twin','accommodations','more_info','xx','holiday_dates','sameday_party','holiday1','holiday2','holiday3','holiday4','holiday5','holiday6','holiday7']
-
+nondatekeys=['nondate1','nondate2','nondate3','nondate4']
 # NISAN = 1
 # IYYAR = 2
 # SIVAN = 3
@@ -83,6 +83,14 @@ def stringify_hdate(hdate):
 def unpack(dt):
 	return (dt.year,dt.month,dt.day)
 
+
+def parse_pref(pref):
+	if (pref == None) or (pref == ""):
+		return 1
+	for rating in range(0,5):
+		if str(rating) in pref:
+			return rating
+
 today = datetime.datetime.today().date()
 sat = dt_next_sat(today)
 
@@ -105,7 +113,11 @@ for person in people:
 	weeks_til = (date(*bmdate) - sat).days // 7
 	earliest = max(0,weeks_til - early_threshold)
 	latest = weeks_til + late_threshold
-
+	nondates = []
+	for key in nondatekeys:
+		if (person[key] is not None) and (person[key] != ''):
+			nondates.append((parse(person[key]).date() - sat).days // 7)
+			person[key] = parse(person[key]).date().strftime("%A, %B %d, %Y")
 	person['hDOB']= hdob
 	person['dob']=dob
 	person['hbmbd']=hbmbd
@@ -118,11 +130,13 @@ for person in people:
 	person['weeks_til']= weeks_til
 	person['earliest'] = earliest
 	person['latest'] = latest
+	person['nondates'] = nondates
 datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
 pprint([{key:person[key] for key in datestuff} for person in people])
 # pprint([{key:val for key,val in person.items() if key in datestuff} for person in people])
 schools = sorted(list({person.get('school') for person in people}))
 dates = sorted(list({d for person in people for d in range(person['earliest'],person['latest']+1)}))
+
 
 date_inds = {date : i for i, date in enumerate(dates)}
 for person in people:
@@ -130,6 +144,7 @@ for person in people:
 	person['earliest_index'] = date_inds[person['earliest']]
 	person['latest_index'] = date_inds[person['latest']]
 	person['school_id'] = schools.index(person['school'])
+	person['nondate_inds'] = [date_inds[d] for d in person['nondates'] if (date_inds.get(d) is not None)] #ignore nondate if outside range of potential dates
 
 # # school_date_conflicts[(school_id,d)]=[i1,i2,i3,...] contains a list of all indices of students eligible for mitzvah on day d who attend school school_id. All such lists are of length at least 2, otherwise no conflict.
 # # date_prospects[d] contains a list of tuples (i,l) where for person indices i and school_id l if person i is eligible for mitzvah on date d
@@ -141,6 +156,12 @@ for i,person in enumerate(people):
 			school_date_conflicts[(person['school_id'],d)] = [i] + [other[0] for other in date_prospects[d] if other[1] == person['school_id']]
 		date_prospects[d].append((i,person['school_id']))
 
+venue_keys = ['pref_main','pref_family','pref_torah']
+#venue ratings
+for person in people:
+	for preflabel in venue_keys:
+		person[preflabel] = parse_pref(person[preflabel])
+pref_vector = []
 
 n = sum(((person['latest_index'] - person['earliest_index'])*venues for person in people)) # x_i_j_k is person i at venue j, date k
 print("Number of decision variables: " + str(n))
@@ -162,6 +183,11 @@ for i,person in enumerate(people):
 			I[(i,j,k)] = ind
 			Ix.append((i,j,k))
 			ensure_mitzvah.append(1*x[ind])
+			pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
+			#set nondates equal to zero
+			if k in person['nondate_inds']:
+				# assignment_model += pulp.lpSum([1*x[ind]]) == 0
+				assignment_model += x[ind]==0
 			ind +=1
 	assignment_model += pulp.lpSum(ensure_mitzvah)==1
 
@@ -169,7 +195,11 @@ for i,person in enumerate(people):
 # #OPTIONAL: minimize number of venues in use per weekend? is there "pulp.lpMax" for m[ind] variables?
 penalty_per_week = 1
 lateness_penalties = [penalty_per_week*(abs(dates[k]-people[i]['weeks_til']))*x[ind] for ind, (i,j,k) in enumerate(Ix)]
-assignment_model += pulp.lpSum(lateness_penalties) #add to objective function
+
+#Restrict nondates:
+#TODO
+assignment_model += pulp.lpSum(lateness_penalties + pref_vector) #add to objective function
+
 
 Im = {}
 Imx = []
@@ -194,6 +224,8 @@ for k,date_student_school_tuples in enumerate(date_prospects):
 				venuelimit.append(1*x[I[(i,j,k)]])
 			assignment_model += pulp.lpSum(venuelimit) <= venue_max[j]
 
+
+
 assignment_model.solve()
 x =[val.varValue for k,val in x.items()]
 
@@ -208,12 +240,9 @@ for person in people:
 	person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
 	person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
 	person['best_week'] = (sat + relativedelta(weeks=person['best_week'])).strftime("%B %d, %Y")
-	del person['earliest_index']
-	del person['latest_index']
-	del person['bday_index']
-	del person['school_id']
-	del person['earliest']
-	del person['latest']
+	for key in ['earliest_index','latest_index','bday_index','school_id','earliest','latest','hDOB','hbmbd',
+	'gbmbd','bmdate','hbmdate']:
+		del person[key]
 
 outfilename = infile.split('.')
 outfilename[-2] +='_solution'
@@ -228,5 +257,9 @@ with outfile:
 pprint(people)
 
 ## TODO:
-# Venue rankings
-# Date restrictions
+# Venue rankings - DONE
+# Date restrictions - DONE
+# holiday_dates
+# older students (within same week) getting preference
+# some nondates given with wrong year - change?
+# if a nondate is not a saturday -- ??
