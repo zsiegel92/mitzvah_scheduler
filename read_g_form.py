@@ -26,7 +26,7 @@ weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunda
 
 
 early_threshold = 0 # number weeks before birthday allowed
-late_threshold = 5 # number of weeks after birthday at which mitzvah is not allowed
+late_threshold = 10 # number of weeks after birthday at which mitzvah is not allowed
 venues = 3
 venue_max = 2 # max number of mitzvahs per venue per day
 venue_max = [2,1,1] #main, family minyan, torah in the round
@@ -143,7 +143,12 @@ for person in people:
 			#check if it's 13 years after birthday
 			person[key] = parse(person[key]).date().strftime("%A, %B %d, %Y")
 	holidates = person['holiday_dates'].split(';')
+	if holidates == ['']:
+		holidates = []
 	for s in holidates:
+		print(s)
+		print(s.split(" - "))
+		print(person['childname'])
 		d1 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2021)).date()
 		d2 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2020)).date()
 		d3 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2022)).date()
