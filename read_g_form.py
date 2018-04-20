@@ -2,11 +2,11 @@ import csv
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 import datetime
-from datetime import date
+from datetime import date, timedelta
 from convertdate import hebrew
 import pulp
 
-heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','nondate1','nondate2','nondate3','nondate4','twin','accommodations','more_info','xx','holiday_dates','sameday_party','holiday1','holiday2','holiday3','holiday4','holiday5','holiday6','holiday7']
+heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','holiday_dates','nondate1','nondate2','nondate3','nondate4','sameday_party','twin','accommodations','more_info']
 nondatekeys=['nondate1','nondate2','nondate3','nondate4']
 # NISAN = 1
 # IYYAR = 2
@@ -95,7 +95,7 @@ today = datetime.datetime.today().date()
 sat = dt_next_sat(today)
 
 # plan['arrivalTime'] = (eventDateTime + relativedelta(minutes=arrivalMins)).isoformat()
-infile = 'Google_Submissions/responses.csv'
+infile = 'Google_Submissions/Mitzvah Scheduling.csv'
 # constraints = readfile('constraints.csv')
 people_raw, headers,people = readfile(infile)
 
@@ -114,10 +114,46 @@ for person in people:
 	earliest = max(0,weeks_til - early_threshold)
 	latest = weeks_til + late_threshold
 	nondates = []
+	notes = ''
 	for key in nondatekeys:
 		if (person[key] is not None) and (person[key] != ''):
-			nondates.append((parse(person[key]).date() - sat).days // 7)
+			nd=parse(person[key]).date()
+			if nd.year==21:
+				nd = nd.replace(year=2021)
+			if nd.weekday() != 5:
+				#if Friday or Saturday, consider as adjacent Saturday. Otherwise, exclude both adjacent Saturdays.
+				if (nd.weekday() == 6):
+					notes += f" Added Saturday before {nd.strftime('%A, %B %d, %Y')} to nondates."
+					# nd = dt_next_sat(nd) - timedelta(days=7)
+					nd = nd - timedelta(days=1)
+					# nondates.append(((nd - sat).days // 7) - 1)#previous week - check this as correct behavior!
+				elif (nd.weekday() == 4):
+					notes += f" Added Saturday after {nd.strftime('%A, %B %d, %Y')} to nondates."
+					nd = nd + timedelta(days=1)
+				else:
+					notes += f" Added Saturdays before & after {nd.strftime('%A, %B %d, %Y')} to nondates."
+					nd = dt_next_sat(nd)
+					nondates.append(((nd - sat).days // 7) - 1)
+			nondates.append((nd - sat).days // 7)
+			mnths = (nd.year - dob.year) * 12 + nd.month - dob.month
+			if abs(mnths - 13*12) > 2:
+				nondates.append((nd.replace(year=dob.year + 13) - sat).days // 7)
+				notes += f" Added year before/after {nd.strftime('%A, %B %d, %Y')} to nondates."
+			#check if it's a saturday. date.weekday() => Monday is 0, Sunday is 6
+			#check if it's 13 years after birthday
 			person[key] = parse(person[key]).date().strftime("%A, %B %d, %Y")
+	holidates = person['holiday_dates'].split(';')
+	for s in holidates:
+		d1 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2021)).date()
+		d2 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2020)).date()
+		d3 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2022)).date()
+		for d in [d1,d2,d3]:
+			if d.weekday() != 5:
+				if d.weekday == 6:
+					d = d-timedelta(days=1)
+				else:
+					d= dt_next_sat(d)
+			nondates.append((d-sat).days // 7)
 	person['hDOB']= hdob
 	person['dob']=dob
 	person['hbmbd']=hbmbd
@@ -131,6 +167,7 @@ for person in people:
 	person['earliest'] = earliest
 	person['latest'] = latest
 	person['nondates'] = nondates
+	person['notes']=notes
 datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
 pprint([{key:person[key] for key in datestuff} for person in people])
 # pprint([{key:val for key,val in person.items() if key in datestuff} for person in people])
@@ -254,6 +291,16 @@ with outfile:
 	for person in people:
 		writer.writerow(person)
 
+optheads = ['dob','school','pref_main','pref_family','pref_torah','holiday_dates','nondate1','nondate2','nondate3','nondate4','accommodations','more_info','nondates','notes','venue','best_week']
+outfilename = infile.split('.')
+outfilename[-2] +='_solution_basic'
+outfilename = '.'.join(outfilename)
+outfile = open(outfilename,'w')
+with outfile:
+	writer = csv.DictWriter(outfile, fieldnames=optheads)
+	writer.writeheader()
+	for person in people:
+		writer.writerow({key:person[key] for key in optheads})
 pprint(people)
 
 ## TODO:
