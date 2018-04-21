@@ -5,6 +5,8 @@ import datetime
 from datetime import date, timedelta
 from convertdate import hebrew
 import pulp
+from Google_Submissions.extra_info import extra_kw, extra
+
 
 heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','holiday_dates','nondate1','nondate2','nondate3','nondate4','sameday_party','twin','accommodations','more_info']
 nondatekeys=['nondate1','nondate2','nondate3','nondate4']
@@ -100,6 +102,25 @@ def parse_pref(pref):
 		if str(rating) in pref:
 			return rating
 
+def find_by_name(name,ls):
+	for el in ls:
+		if (name.lower() in el['childname'].lower()) or (el['childname'].lower() in name.lower()):
+			return el
+	return None
+
+def index_by_name(name,ls):
+	for i,el in enumerate(ls):
+		if (name.lower() in el['childname'].lower()) or (el['childname'].lower() in name.lower()):
+			return i
+	return None
+def week_to_date(wk,this_sat):
+	if wk is None:
+		return "None"
+	return (this_sat + relativedelta(weeks=wk)).strftime("%B %d, %Y")
+
+def dt_to_week(dt,this_sat):
+	return (dt-sat).days // 7
+
 today = datetime.datetime.today().date()
 sat = dt_next_sat(today)
 
@@ -119,7 +140,7 @@ for person in people:
 	gbmbd = hebrew.to_gregorian(*hbmbd)
 	bmdate = next_sat(*gbmbd)
 	hbmdate = hebrew.from_gregorian(*bmdate)
-	weeks_til = (date(*bmdate) - sat).days // 7
+	weeks_til = dt_to_week(date(*bmdate),sat)
 	earliest = max(0,weeks_til - early_threshold)
 	latest = weeks_til + late_threshold
 	days_before_sat = (date(year = bmdate[0],month=bmdate[1],day=bmdate[2]) - date(year = gbmbd[0], month = gbmbd[1],day= gbmbd[2])).days
@@ -144,11 +165,11 @@ for person in people:
 				else:
 					notes += f" Added Saturdays before & after {nd.strftime('%A, %B %d, %Y')} to nondates."
 					nd = dt_next_sat(nd)
-					nondates.append(((nd - sat).days // 7) - 1)
-			nondates.append((nd - sat).days // 7)
+					nondates.append(dt_to_week(nd,sat) - 1)
+			nondates.append(dt_to_week(nd,sat))
 			mnths = (nd.year - dob.year) * 12 + nd.month - dob.month
 			if abs(mnths - 13*12) > 2:
-				nondates.append((nd.replace(year=dob.year + 13) - sat).days // 7)
+				nondates.append(dt_to_week(nd.replace(year=dob.year + 13),sat))
 				notes += f" Added year before/after {nd.strftime('%A, %B %d, %Y')} to nondates."
 			#check if it's a saturday. date.weekday() => Monday is 0, Sunday is 6
 			#check if it's 13 years after birthday
@@ -166,7 +187,9 @@ for person in people:
 					d = d-timedelta(days=1)
 				else:
 					d= dt_next_sat(d)
-			nondates.append((d-sat).days // 7)
+			nondates.append(dt_to_week(d,sat))
+
+
 	person['hDOB']= hdob
 	person['dob']=dob
 	person['hbmbd']=hbmbd
@@ -182,12 +205,46 @@ for person in people:
 	person['nondates'] = nondates
 	person['notes']=notes
 	person['days_before_sat'] = days_before_sat
+	person['requested_dates'] = []
+	person['required_date_ind'] = None
 # datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
 # pprint([{key:person[key] for key in datestuff} for person in people])
 # pprint([{key:val for key,val in person.items() if key in datestuff} for person in people])
+
+#Read extra_info.extras
+for person_name,extras in extra.items():
+	person = find_by_name(person_name,people)
+	for k in extra_kw:
+		person[k] = extras.get(k,None)
+	if person['requested_dates'] is None:
+		person['requested_dates']=[]
+	if person['nosummer']==True:
+		person['requested_after'] = "Saturday, September 4, 2021"
+	if person['requested_after'] is not None:
+		person['requested_after'] = dt_to_week(parse(person['requested_after']).date(),sat)
+	if person['required_date'] is not None:
+		person['required_date'] = dt_to_week(parse(person['required_date']).date(),sat)
+	person['requested_dates'] = [dt_to_week(parse(d).date(),sat) for d in person['requested_dates']]
+	if person['sharewith'] is not None:
+		person['sharewith'] = index_by_name(person['sharewith'],people)
+	if person['notsameday'] is not None:
+		person['notsameday'] = [index_by_name(aname,people) for aname in person['notsameday']]
+	if person['requested_after'] is not None:
+		#Arbitrary - if bm requested after date, treat that date as birthday
+		for d in range(person['requested_after'],person['requested_after']+ late_threshold):
+			person['requested_dates'].append(d)
+	if (person['required_date'] is not None) and (person['required_date'] not in person['requested_dates']):
+		person['requested_dates'].append(person['required_date'])
+# print("PRINTING PEOPLE")
+# pprint(people)
+
 schools = sorted(list({person.get('school') for person in people}))
 hschools = sorted(list({person.get('hschool') for person in people}))
-dates = sorted(list({d for person in people for d in range(person['earliest'],person['latest']+1)}))
+dates = {d for person in people for d in range(person['earliest'],person['latest']+1)}| {d for person in people for d in person['requested_dates']}
+# print(dates)
+# print("\n".join([f"{person['childname']} : {[week_to_date(d,sat) for d in person['requested_dates'] ]}" for person in people]))
+# print("\n".join([f"{person['childname']} : {[d for d in person['requested_dates'] ]}" for person in people]))
+dates = sorted(list(dates))
 
 for person in people:
 	if 'lainer' in person['school'].lower():
@@ -195,15 +252,19 @@ for person in people:
 	if 'lainer' in person['hschool'].lower():
 		person['hschool']='The Lainer School of Sinai Temple'
 
-print(schools)
-print(hschools)
 
 date_inds = {date : i for i, date in enumerate(dates)}
+print([k for k in date_inds])
 for person in people:
+	person['school_id'] = schools.index(person['school'])
 	person['bday_index'] = date_inds[person['weeks_til']]
 	person['earliest_index'] = date_inds[person['earliest']]
 	person['latest_index'] = date_inds[person['latest']]
-	person['school_id'] = schools.index(person['school'])
+	print(list(range(person['earliest_index'],person['latest_index'])) + person['requested_dates'])
+	person['date_inds'] =list(range(person['earliest_index'],person['latest_index'])) + [date_inds[thing] for thing in person['requested_dates']]
+	person['requested_date_inds'] = [date_inds[thing] for thing in person['requested_dates']]
+	if person['required_date_ind'] is not None:
+		person['required_date_ind'] = date_inds[person['required_date']]
 	person['nondate_inds'] = [date_inds[d] for d in person['nondates'] if (date_inds.get(d) is not None)] #ignore nondate if outside range of potential dates
 
 # # school_date_conflicts[(school_id,d)]=[i1,i2,i3,...] contains a list of all indices of students eligible for mitzvah on day d who attend school school_id. All such lists are of length at least 2, otherwise no conflict.
@@ -211,10 +272,12 @@ for person in people:
 school_date_conflicts = {}
 date_prospects = [[] for d in dates]
 for i,person in enumerate(people):
-	for d in range(person['earliest_index'],person['latest_index']):
+	# for d in range(person['earliest_index'],person['latest_index']):
+	for d in person['date_inds']:
 		if any([other[1]==person['school_id'] for other in date_prospects[d]]):
 			school_date_conflicts[(person['school_id'],d)] = [i] + [other[0] for other in date_prospects[d] if other[1] == person['school_id']]
 		date_prospects[d].append((i,person['school_id']))
+
 
 venue_keys = ['pref_main','pref_family','pref_torah']
 #venue ratings
@@ -223,12 +286,13 @@ for person in people:
 		person[preflabel] = parse_pref(person[preflabel])
 pref_vector = []
 
-n = sum(((person['latest_index'] - person['earliest_index'])*venues for person in people)) # x_i_j_k is person i at venue j, date k
-print("Number of decision variables: " + str(n))
+n = sum(((len(person['date_inds']))*venues for person in people)) # x_i_j_k is person i at venue j, date k
+print("Number of decision variables (excluding extra requirements): " + str(n))
 
 x=pulp.LpVariable.dicts('assignments',range(0,n),lowBound=0,upBound=1,cat=pulp.LpBinary)
 m=pulp.LpVariable.dicts('school-date-limits',range(0,len(school_date_conflicts)*venues),lowBound=0,upBound=1,cat=pulp.LpBinary)
 assignment_model=pulp.LpProblem('assignment model',pulp.LpMinimize)
+
 
 I = {}
 Ix = []
@@ -239,11 +303,16 @@ ind = 0
 for i,person in enumerate(people):
 	ensure_mitzvah=[]
 	for j in range(venues):
-		for k in range(person['earliest_index'],person['latest_index']):
+		for k in person['date_inds']:
 			I[(i,j,k)] = ind
 			Ix.append((i,j,k))
 			ensure_mitzvah.append(1*x[ind])
-			pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
+			if k not in person['requested_date_inds']:
+				pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
+			elif k == person['required_date_ind']:
+				pref_vector.append((-5*person[venue_keys[j]] - 2)*x[ind]) #venue preferences
+			else:
+				pref_vector.append((-1*person[venue_keys[j]] - 2)*x[ind]) #venue preferences
 			#set nondates equal to zero
 			if k in person['nondate_inds']:
 				# assignment_model += pulp.lpSum([1*x[ind]]) == 0
@@ -255,7 +324,7 @@ for i,person in enumerate(people):
 #Lainer School not-same-day requirement
 for i,person in enumerate(people):
 	for j in range(venues):
-		for k in range(person['earliest_index'],person['latest_index']):
+		for k in person['date_inds']:
 			if "lainer" in person['school'].lower():
 				for y,persony in enumerate(people):
 					if "lainer" in persony['school']:
@@ -289,10 +358,13 @@ for r, ((l,k),students) in enumerate(school_date_conflicts.items()):
 # # Venue j can host at maximum venue_max[j] mitzvahs in a day
 for k,date_student_school_tuples in enumerate(date_prospects):
 	for j in range(venues):
-		if len(date_student_school_tuples) > venue_max[j]:
+		if len(date_student_school_tuples) > venue_max[j]-1:
 			venuelimit = []
 			for (i,l) in date_student_school_tuples:
-				venuelimit.append(1*x[I[(i,j,k)]])
+				if people[i].get('solo')==True:
+					venuelimit.append(2*x[I[(i,j,k)]])
+				else:
+					venuelimit.append(1*x[I[(i,j,k)]])
 			assignment_model += pulp.lpSum(venuelimit) <= venue_max[j]
 
 
@@ -307,8 +379,7 @@ for (i,j,k) in winners:
 	people[i]['venue'] = j
 	people[i]['best_week'] = dates[k]
 
-def week_to_date(wk,this_sat):
-	return (this_sat + relativedelta(weeks=wk)).strftime("%B %d, %Y")
+
 
 for person in people:
 	# person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
