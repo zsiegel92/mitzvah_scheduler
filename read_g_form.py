@@ -58,15 +58,24 @@ def plus_thirteen(greg):
 			#month and day fit
 			hdate = (hy+13,hm,hd)
 		elif hebrew.year_months(hy+13) >= hm + 1:
-			#not enough days in month
-			hdate = (hy + 13,hm+1,1)
+			#another month in year, not enough days in month
+			if (hm+1 == 7):
+				hdate = (hy + 14,hm+1,1)
+			else:
+				hdate = (hy + 13,hm+1,1)
 		else:
-			#not enough days in month, last month
-			hdate = (hy + 14, 1,1)
+			#not enough months in year, not enough days in month
+			hdate = (hy + 13, 1,1)
 	else:
 		#not enough months in year
-		hdate = (hy+14,1,1)
+		hdate = (hy+13,1,1)
 	return hdate
+
+def plus_thirteen2(greg):
+	(hy,hm,hd)= hebrew.from_gregorian(greg.year,greg.month,greg.day)
+	h = hebrew.to_jd_gregorianyear(greg.year+13,hm,hd)
+	print(f"Converted gregorian {greg} to hebrew {h}")
+	return h
 
 #Monday is 0, Saturday is 5, Sunday is 6
 def dt_next_sat(dt):
@@ -113,6 +122,8 @@ for person in people:
 	weeks_til = (date(*bmdate) - sat).days // 7
 	earliest = max(0,weeks_til - early_threshold)
 	latest = weeks_til + late_threshold
+	days_before_sat = (date(year = bmdate[0],month=bmdate[1],day=bmdate[2]) - date(year = gbmbd[0], month = gbmbd[1],day= gbmbd[2])).days
+	# print(f"bmdate is {date(year = bmdate[0],month=bmdate[1],day=bmdate[2]).strftime('%A, %B %d, %Y')}, gbmbd is {date(year = gbmbd[0], month = gbmbd[1],day= gbmbd[2]).strftime('%A, %B %d, %Y')}, and days_before_sat is {days_before_sat}\n")
 	nondates = []
 	notes = ''
 	for key in nondatekeys:
@@ -146,9 +157,6 @@ for person in people:
 	if holidates == ['']:
 		holidates = []
 	for s in holidates:
-		print(s)
-		print(s.split(" - "))
-		print(person['childname'])
 		d1 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2021)).date()
 		d2 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2020)).date()
 		d3 = parse(s.split(' - ')[0],fuzzy=True,default=datetime.datetime.now().replace(year=2022)).date()
@@ -173,12 +181,22 @@ for person in people:
 	person['latest'] = latest
 	person['nondates'] = nondates
 	person['notes']=notes
-datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
-pprint([{key:person[key] for key in datestuff} for person in people])
+	person['days_before_sat'] = days_before_sat
+# datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
+# pprint([{key:person[key] for key in datestuff} for person in people])
 # pprint([{key:val for key,val in person.items() if key in datestuff} for person in people])
 schools = sorted(list({person.get('school') for person in people}))
+hschools = sorted(list({person.get('hschool') for person in people}))
 dates = sorted(list({d for person in people for d in range(person['earliest'],person['latest']+1)}))
 
+for person in people:
+	if 'lainer' in person['school'].lower():
+		person['school']='The Lainer School of Sinai Temple'
+	if 'lainer' in person['hschool'].lower():
+		person['hschool']='The Lainer School of Sinai Temple'
+
+print(schools)
+print(hschools)
 
 date_inds = {date : i for i, date in enumerate(dates)}
 for person in people:
@@ -233,13 +251,24 @@ for i,person in enumerate(people):
 			ind +=1
 	assignment_model += pulp.lpSum(ensure_mitzvah)==1
 
+
+#Lainer School not-same-day requirement
+for i,person in enumerate(people):
+	for j in range(venues):
+		for k in range(person['earliest_index'],person['latest_index']):
+			if "lainer" in person['school'].lower():
+				for y,persony in enumerate(people):
+					if "lainer" in persony['school']:
+						i_ind = I[(i,j,k)]
+						y_ind = I[(y,j,k)]
+						assignment_model += x[i_ind] + x[y_ind] <=1
+
 # # Add penalty for bnei mitzvah being n weeks after birthday.
 # #OPTIONAL: minimize number of venues in use per weekend? is there "pulp.lpMax" for m[ind] variables?
 penalty_per_week = 1
-lateness_penalties = [penalty_per_week*(abs(dates[k]-people[i]['weeks_til']))*x[ind] for ind, (i,j,k) in enumerate(Ix)]
+lateness_penalties = [penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind] for ind, (i,j,k) in enumerate(Ix)]
+#Add days before sat*(1/7) to ensure that older students receive a slightly larger penalty than younger students, enforcing which will yield earlier BMs
 
-#Restrict nondates:
-#TODO
 assignment_model += pulp.lpSum(lateness_penalties + pref_vector) #add to objective function
 
 
@@ -278,13 +307,24 @@ for (i,j,k) in winners:
 	people[i]['venue'] = j
 	people[i]['best_week'] = dates[k]
 
+def week_to_date(wk,this_sat):
+	return (this_sat + relativedelta(weeks=wk)).strftime("%B %d, %Y")
+
 for person in people:
-	person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
-	person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
-	person['best_week'] = (sat + relativedelta(weeks=person['best_week'])).strftime("%B %d, %Y")
-	for key in ['earliest_index','latest_index','bday_index','school_id','earliest','latest','hDOB','hbmbd',
-	'gbmbd','bmdate','hbmdate']:
-		del person[key]
+	# person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
+	# person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
+	# person['best_week'] = (sat + relativedelta(weeks=person['best_week'])).strftime("%B %d, %Y")
+	person['earliest_ind'] = person['earliest']
+	person['earliest'] = week_to_date(person['earliest'],sat)
+	person['latest'] = week_to_date(person['latest'],sat)
+	person['best_week_ind']=person['best_week']
+	person['best_week'] = week_to_date(person['best_week'],sat)
+	person['nondates'] = [week_to_date(d,sat) for d in person['nondates']]
+	# person['dob'] = parse(person['dob']).date()
+	person['best_week'] = parse(person['best_week']).date()
+	person['venue_prefs'] = [person[key] for key in ['pref_main','pref_family','pref_torah']]
+	person['top_venue'] = person['venue_prefs'][person['venue']] == max(person['venue_prefs'])
+	person['weeks_after_earliest'] = person['best_week_ind']-person['earliest_ind']
 
 outfilename = infile.split('.')
 outfilename[-2] +='_solution'
@@ -296,7 +336,8 @@ with outfile:
 	for person in people:
 		writer.writerow(person)
 
-optheads = ['dob','school','pref_main','pref_family','pref_torah','holiday_dates','nondate1','nondate2','nondate3','nondate4','accommodations','more_info','nondates','notes','venue','best_week']
+
+optheads = ['childname','school','nondates','accommodations','more_info','more_info','notes','dob','gbmbd','venue_prefs','venue','top_venue','best_week','weeks_after_earliest']
 outfilename = infile.split('.')
 outfilename[-2] +='_solution_basic'
 outfilename = '.'.join(outfilename)
@@ -306,12 +347,9 @@ with outfile:
 	writer.writeheader()
 	for person in people:
 		writer.writerow({key:person[key] for key in optheads})
-pprint(people)
+# pprint(people)
 
-## TODO:
-# Venue rankings - DONE
-# Date restrictions - DONE
-# holiday_dates
-# older students (within same week) getting preference
-# some nondates given with wrong year - change?
-# if a nondate is not a saturday -- ??
+
+
+
+
