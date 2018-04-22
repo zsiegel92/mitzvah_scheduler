@@ -296,6 +296,8 @@ for person in people:
 			pass
 		else:
 			person['childname'] += f" and {shared['childname']} ({shared['email']})"
+			person['accommodations'] += f" (for {shared['childname']} - '{shared['accommodations']}')"
+			person['more_info'] += f" (for {shared['childname']} - '{shared['more_info']}')"
 			to_remove.append(shared)
 			to_save.append(person)
 	if person['twin'] is True:
@@ -324,7 +326,7 @@ venue_keys = ['pref_main','pref_family','pref_torah']
 for person in people:
 	for preflabel in venue_keys:
 		person[preflabel] = parse_pref(person[preflabel])
-pref_vector = []
+
 
 n = sum(((len(person['date_inds']))*venues for person in people)) # x_i_j_k is person i at venue j, date k
 print("Number of decision variables (excluding extra requirements): " + str(n))
@@ -340,20 +342,32 @@ ind = 0
 # forall i, Sum_j,k x_i_j_k == 1
 # x[I[(i,j,k)]] = x_i_j_k
 # Ix[I[(i,j,k)]] = (i,j,k)
+pref_vector = []
 for i,person in enumerate(people):
 	ensure_mitzvah=[]
 	for j in range(venues):
 		for k in person['date_inds']:
 			I[(i,j,k)] = ind
 			Ix.append((i,j,k))
-			ensure_mitzvah.append(1*x[ind])
-			pref_vector.append((-5*person[venue_keys[j]])*x[ind]) #venue preferences
+			# ensure_mitzvah.append(1*x[ind])
+			# pref_vector.append((-5*person[venue_keys[j]])*x[ind]) #venue preferences
 			#set nondates equal to zero
 			if k in person['nondate_inds']:
 				# assignment_model += pulp.lpSum([1*x[ind]]) == 0
 				assignment_model += x[ind]==0
 			ind +=1
-	assignment_model += pulp.lpSum(ensure_mitzvah)==1
+	# assignment_model += pulp.lpSum(ensure_mitzvah)==1
+
+ensure_mitzvah = [[] for person in people]
+pref_vector = []
+for ind, (i,j,k) in enumerate(Ix):
+	ensure_mitzvah[i].append(1*x[ind])
+	person = people[i]
+	pref_vector.append((-2*person[venue_keys[j]])*x[ind])
+for ls in ensure_mitzvah:
+	assignment_model += pulp.lpSum(ls)==1
+
+
 
 
 #Lainer School not-same-day requirement
@@ -449,7 +463,8 @@ for ind, (i,j,k) in enumerate(Ix):
 	if (j,k) not in venue_sums:
 		venue_sums[(j,k)]=[]
 	person = people[i]
-	if person.get('solo')==True:
+	#"solo" only affects main sanctuary
+	if person.get('solo')==True and (j == 0):
 		# venue_sums[(j,k)].append(2*x[ind]) #real
 		venue_sums[(j,k)].append(2*x[ind]) #relaxed
 	else:
@@ -493,6 +508,7 @@ for person in people:
 	if person['shared']==True and person['solo']==True:
 		person['solo_sharing_problem']=True
 
+venue_names = ['Main Sanctuary','Family Minyan','Torah in the Round']
 for person in people:
 	# person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
 	# person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
@@ -508,9 +524,13 @@ for person in people:
 	person['venue_prefs'] = [person[key] for key in ['pref_main','pref_family','pref_torah']]
 	person['top_venue'] = person['venue_prefs'][person['venue']] == max(person['venue_prefs'])
 	person['weeks_after_earliest'] = person['best_week_ind']-person['earliest_ind']
-
-
-
+	person['Venue']= venue_names[person['venue']]
+	person['BM Date'] = person['best_week'].strftime("%B %d, %Y")
+	person['gbmbd'] = date(*person['gbmbd']).strftime("%B %d, %Y")
+	person['dob']=person['dob'].strftime("%B %d, %Y")
+	keychanges = {'childname':'Child Name','dob':"Date of Birth",'hschool':"Hebrew School",'school':"Academic School",'over200':"Number Guests",'sameday_party':"Party on Same Day?",'twin':"Twin?","shared":"Shared Ceremony",'top_venue':'Assigned Top-Ranked Venue','gbmbd':'Thirteenth Hebrew Birthday','weeks_after_earliest':"Number of Weeks after Earliest Possible Date"}
+	for k, v in keychanges.items():
+		person[v]=person[k]
 people = sorted(people,key = lambda person: person['best_week'])
 
 outfilename = infile.split('.')
@@ -524,7 +544,7 @@ with outfile:
 		writer.writerow(person)
 
 
-optheads = ['childname','nondates','accommodations','more_info','more_info','notes','dob','gbmbd','venue_prefs','top_venue','weeks_after_earliest','school','venue','best_week','shared']
+optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
 outfilename[-2] +='_solution_basic'
 outfilename = '.'.join(outfilename)
