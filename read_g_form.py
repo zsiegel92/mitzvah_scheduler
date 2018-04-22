@@ -249,33 +249,6 @@ for person in people:
 			person['requested_dates'].append(person['required_date'])
 
 
-# for person_name,extras in extra.items():
-# 	person = find_by_name(person_name,people)
-# 	for k in extra_kw:
-# 		person[k] = extras.get(k,None)
-# 	if person['requested_dates'] is None:
-# 		person['requested_dates']=[]
-# 	if person['nosummer']==True:
-# 		person['requested_after'] = summer_end_str
-# 		for d in summer_dates:
-# 			person['nondates'].append(d)
-# 	if person['requested_after'] is not None:
-# 		person['requested_after'] = dt_to_week(parse(person['requested_after']).date(),sat)
-# 	if person['required_date'] is not None:
-# 		person['required_date'] = dt_to_week(parse(person['required_date']).date(),sat)
-# 	person['requested_dates'] = [dt_to_week(parse(d).date(),sat) for d in person['requested_dates']]
-# 	if person['sharewith'] is not None:
-# 		person['sharewith'] = index_by_name(person['sharewith'],people)
-# 	if person['notsameday'] is not None:
-# 		person['notsameday'] = [index_by_name(aname,people) for aname in person['notsameday']]
-# 	if person['requested_after'] is not None:
-# 		#Arbitrary - if bm requested after date, treat that date as birthday
-# 		for d in range(person['requested_after'],person['requested_after']+ late_threshold):
-# 			person['requested_dates'].append(d)
-# 	if (person['required_date'] is not None) and (person['required_date'] not in person['requested_dates']):
-# 		person['requested_dates'].append(person['required_date'])
-# print("PRINTING PEOPLE")
-# pprint(people)
 
 schools = sorted(list({person.get('school') for person in people}))
 hschools = sorted(list({person.get('hschool') for person in people}))
@@ -306,6 +279,32 @@ for person in people:
 		person['required_date_ind']=None
 	person['nondate_inds'] = [date_inds[d] for d in person['nondates'] if (date_inds.get(d) is not None)] #ignore nondate if outside range of potential dates
 
+
+
+# twin & shared handling
+to_remove = []
+to_save = []
+for person in people:
+	shared = None
+	if ("sharewith" in person) and (person['sharewith'] is not None) and (person['sharewith'] != -1):
+		shared = people[person['sharewith']]
+	if shared is not None:
+		person['nondates'] = sorted(list(set(person['nondates'] + shared['nondates'])))
+		person['solo'] = True
+		shared['solo'] = True
+		if shared  in to_save:
+			pass
+		else:
+			person['childname'] += f" and {shared['childname']} ({shared['email']})"
+			to_remove.append(shared)
+			to_save.append(person)
+	if person['twin'] is True:
+		person['solo'] = True
+print(f"len people: {len(people)}")
+for person in to_remove:
+	if person in people:
+		people.remove(person)
+print(f"len people: {len(people)}")
 # # school_date_conflicts[(school_id,d)]=[i1,i2,i3,...] contains a list of all indices of students eligible for mitzvah on day d who attend school school_id. All such lists are of length at least 2, otherwise no conflict.
 # # date_prospects[d] contains a list of tuples (i,l) where for person indices i and school_id l if person i is eligible for mitzvah on date d
 school_date_conflicts = {}
@@ -348,13 +347,7 @@ for i,person in enumerate(people):
 			I[(i,j,k)] = ind
 			Ix.append((i,j,k))
 			ensure_mitzvah.append(1*x[ind])
-			pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
-			# if k not in person['requested_date_inds']: #regular date
-			# 	pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
-			# elif k == person['required_date_ind']: #required date
-			# 	pref_vector.append((-5*person[venue_keys[j]] - 5)*x[ind]) #venue preferences
-			# else: #requested date
-			# 	pref_vector.append((-1*person[venue_keys[j]] - 5)*x[ind]) #venue preferences
+			pref_vector.append((-5*person[venue_keys[j]])*x[ind]) #venue preferences
 			#set nondates equal to zero
 			if k in person['nondate_inds']:
 				# assignment_model += pulp.lpSum([1*x[ind]]) == 0
@@ -425,7 +418,7 @@ for ind, (i,j,k) in enumerate(Ix):
 		pen = -5*x[ind]
 	else: #requested date
 		# pref_vector.append((-1*person[venue_keys[j]] - 5)*x[ind]) #venue preferences
-		pen = request_weekly_penalty_factor*penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7) - 3)*x[ind]
+		pen = request_weekly_penalty_factor*penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) - 3)*x[ind]
 	# pen = penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind]
 	lateness_penalties.append(pen)
 #Add days before sat*(1/7) to ensure that older students receive a slightly larger penalty than younger students, enforcing which will yield earlier BMs
@@ -516,6 +509,10 @@ for person in people:
 	person['top_venue'] = person['venue_prefs'][person['venue']] == max(person['venue_prefs'])
 	person['weeks_after_earliest'] = person['best_week_ind']-person['earliest_ind']
 
+
+
+people = sorted(people,key = lambda person: person['best_week'])
+
 outfilename = infile.split('.')
 outfilename[-2] +='_solution'
 outfilename = '.'.join(outfilename)
@@ -527,7 +524,7 @@ with outfile:
 		writer.writerow(person)
 
 
-optheads = ['childname','nondates','accommodations','more_info','more_info','notes','dob','gbmbd','venue_prefs','top_venue','weeks_after_earliest','school','venue','best_week','shared','venue_sharing_problem','solo','solo_sharing_problem','lainer_sharing_problem','same_school_sameday']
+optheads = ['childname','nondates','accommodations','more_info','more_info','notes','dob','gbmbd','venue_prefs','top_venue','weeks_after_earliest','school','venue','best_week','shared']
 outfilename = infile.split('.')
 outfilename[-2] +='_solution_basic'
 outfilename = '.'.join(outfilename)
