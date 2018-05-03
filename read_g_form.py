@@ -388,16 +388,16 @@ for ls in ensure_mitzvah:
 
 
 # # Lainer students don't have same-day BMs
-# # Can uncomment ALL of this
-# lainer_sums={}
-# for ind, (i,j,k) in enumerate(Ix):
-# 	if k not in lainer_sums:
-# 		lainer_sums[k]=[]
-# 	person = people[i]
-# 	if "lainer" in person['school'].lower():
-# 		lainer_sums[k].append(1*x[ind])
-# for k,val in lainer_sums.items():
-# 	assignment_model += pulp.lpSum(val) <= 1
+# # Can comment/uncomment ALL of this
+lainer_sums={}
+for ind, (i,j,k) in enumerate(Ix):
+	if k not in lainer_sums:
+		lainer_sums[k]=[]
+	person = people[i]
+	if "lainer" in person['school'].lower():
+		lainer_sums[k].append(1*x[ind])
+for k,val in lainer_sums.items():
+	assignment_model += pulp.lpSum(val) <= 1
 
 # All schools, limit to one student per day - can comment out this entire block if not a true requirement
 school_sums = {}
