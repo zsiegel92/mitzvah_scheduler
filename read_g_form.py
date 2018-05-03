@@ -28,7 +28,7 @@ weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunda
 
 
 early_threshold = 0 # number weeks before birthday allowed
-late_threshold = 15 # number of weeks after birthday at which mitzvah is not allowed
+late_threshold = 25 # number of weeks after birthday at which mitzvah is not allowed
 venues = 3
 venue_max = 2 # max number of mitzvahs per venue per day
 venue_max = [2,1,1] #main, family minyan, torah in the round
@@ -42,6 +42,8 @@ def pprint(list_of_dicts):
 
 
 def readfile(filename):
+	def users_same(u,o):
+		return (u['email']==o['email']) and ((u['childname'].lower() in o['childname'].lower()) or ((o['childname'].lower() in u['childname'].lower())))
 	filein = open(filename, 'r')
 	reader = csv.reader(filein)
 	headers = next(reader, None)
@@ -50,11 +52,22 @@ def readfile(filename):
 	next(reader, None)
 	xheads=['xx','holiday1','holiday2','holiday3','holiday4','holiday5','holiday6','holiday7']
 	cleanusers = [{heads[i] : row[i] for i in range(len(heads)) if heads[i] not in xheads} for row in reader]
+
+	to_remove=[]
+	for i,user in enumerate(cleanusers):
+		for other in cleanusers:
+			if users_same(user,other):
+				if (parse(user['timestamp']) < parse(other['timestamp'])):
+					to_remove.append(i)
+	to_remove=list(set(to_remove))
+	cleanusers = [v for i,v in enumerate(cleanusers) if i not in to_remove]
+
 	return users, headers,cleanusers
 
 
 def plus_thirteen(greg):
-	(hy,hm,hd)= hebrew.from_gregorian(greg.year,greg.month,greg.day)
+	greg2 = greg + timedelta(days=1)
+	(hy,hm,hd)= hebrew.from_gregorian(greg2.year,greg2.month,greg2.day)
 	if hebrew.year_months(hy+13) >= hm:
 		if  hebrew.month_days(hy+13,hm) >= hd:
 			#month and day fit
@@ -74,9 +87,10 @@ def plus_thirteen(greg):
 	return hdate
 
 def plus_thirteen2(greg):
-	(hy,hm,hd)= hebrew.from_gregorian(greg.year,greg.month,greg.day)
-	h = hebrew.to_jd_gregorianyear(greg.year+13,hm,hd)
-	print(f"Converted gregorian {greg} to hebrew {h}")
+	greg2 = greg + timedelta(days=1)
+	(hy,hm,hd)= hebrew.from_gregorian(greg2.year,greg2.month,greg2.day)
+	h = hebrew.to_jd_gregorianyear(greg2.year+13,hm,hd)
+	print(f"Converted gregorian {greg2} to hebrew {h}")
 	return h
 
 #Monday is 0, Saturday is 5, Sunday is 6
@@ -211,12 +225,18 @@ for person in people:
 	person['notes']=notes
 	person['days_before_sat'] = days_before_sat
 
+
 # datestuff = ['dob','hfullbd','bmdate','hfullbmdate']
 # pprint([{key:person[key] for key in datestuff} for person in people])
 # pprint([{key:val for key,val in person.items() if key in datestuff} for person in people])
 
+num_unknown_schools = 0
+
 #Read extra_info.extras
 for person in people:
+	if (person['school'] is None) or (person['school'] == '') or ('school' not in person):
+		person['school'] = f"unknown_{num_unknown_schools}"
+		num_unknown_schools += 1
 	for k in extra_kw:
 		if k not in person:
 			person[k]=None
@@ -247,7 +267,6 @@ for person in people:
 				person['requested_dates'].append(d)
 		if (person['required_date'] is not None) and (person['required_date'] not in person['requested_dates']):
 			person['requested_dates'].append(person['required_date'])
-
 
 
 schools = sorted(list({person.get('school') for person in people}))
@@ -300,7 +319,7 @@ for person in people:
 			person['more_info'] += f" (for {shared['childname']} - '{shared['more_info']}')"
 			to_remove.append(shared)
 			to_save.append(person)
-	if person['twin'] is True:
+	if 'yes' in person['twin'].lower():
 		person['solo'] = True
 print(f"len people: {len(people)}")
 for person in to_remove:
@@ -368,33 +387,17 @@ for ls in ensure_mitzvah:
 	assignment_model += pulp.lpSum(ls)==1
 
 
-
-
-#Lainer School not-same-day requirement
-# for i,person in enumerate(people):
-# 	for j in range(venues):
-# 		for k in person['date_inds']:
-# 			if "lainer" in person['school'].lower():
-# 				for y,persony in enumerate(people):
-# 					if "lainer" in persony['school']:
-# 						i_ind = I[(i,j,k)]
-# 						y_ind = I[(y,j,k)]
-# 						assignment_model += x[i_ind] + x[y_ind] <=1
-
-
-
-# # Lainer restrictions, attempted another way...
-lainer_sums={}
-for ind, (i,j,k) in enumerate(Ix):
-	if k not in lainer_sums:
-		lainer_sums[k]=[]
-	person = people[i]
-	if "lainer" in person['school'].lower():
-		lainer_sums[k].append(1*x[ind])
-
-for k,val in lainer_sums.items():
-	# print(f"lainer_sums list has {len(val)} elements")
-	assignment_model += pulp.lpSum(val) <= 1
+# # Lainer students don't have same-day BMs
+# # Can uncomment ALL of this
+# lainer_sums={}
+# for ind, (i,j,k) in enumerate(Ix):
+# 	if k not in lainer_sums:
+# 		lainer_sums[k]=[]
+# 	person = people[i]
+# 	if "lainer" in person['school'].lower():
+# 		lainer_sums[k].append(1*x[ind])
+# for k,val in lainer_sums.items():
+# 	assignment_model += pulp.lpSum(val) <= 1
 
 # All schools, limit to one student per day - can comment out this entire block if not a true requirement
 school_sums = {}
@@ -409,7 +412,8 @@ for sch in schools:
 			sch_sum[k].append(1*x[ind])
 	for k,val in sch_sum.items():
 		# print(f"lainer_sums list has {len(val)} elements")
-		assignment_model += pulp.lpSum(val) <= 1
+		assignment_model += pulp.lpSum(val) <= 1.01 #can be 0, potential numeric issue
+
 
 
 
@@ -417,7 +421,7 @@ for sch in schools:
 
 # # Add penalty for bnei mitzvah being n weeks after birthday.
 # #OPTIONAL: minimize number of venues in use per weekend? is there "pulp.lpMax" for m[ind] variables?
-penalty_per_week = 1
+penalty_per_week = 2
 # lateness_penalties = [penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind] for ind, (i,j,k) in enumerate(Ix)]
 lateness_penalties =[]
 for ind, (i,j,k) in enumerate(Ix):
@@ -444,6 +448,8 @@ assignment_model += pulp.lpSum(lateness_penalties + pref_vector) #add to objecti
 Im = {}
 Imx = []
 ind = 0
+# for k,v in school_date_conflicts.items():
+# 	print(f"{k}: {v}")
 for ((l,k),students) in school_date_conflicts.items():
 	onevenue = []
 	for j in range(venues):
@@ -451,13 +457,13 @@ for ((l,k),students) in school_date_conflicts.items():
 		Imx.append((j,l,k))
 		onevenue.append(1*m[ind])
 		for i in students:
-			assignment_model += pulp.lpSum([1*x[I[(i,j,k)]],-1*m[ind]]) <= 0
+			assignment_model += pulp.lpSum([1*x[I[(i,j,k)]],-1*m[ind]]) <= .01 #can be 0, potential numeric issue
 		ind +=1
-	assignment_model += pulp.lpSum(onevenue)<=1
+	assignment_model += pulp.lpSum(onevenue)<=1.01 #can be 0, potential numeric issue
 
 
 
-# # Venue restrictions, attempted another way...
+# # Venue restrictions
 venue_sums={}
 for ind, (i,j,k) in enumerate(Ix):
 	if (j,k) not in venue_sums:
@@ -465,14 +471,13 @@ for ind, (i,j,k) in enumerate(Ix):
 	person = people[i]
 	#"solo" only affects main sanctuary
 	if person.get('solo')==True and (j == 0):
-		# venue_sums[(j,k)].append(2*x[ind]) #real
-		venue_sums[(j,k)].append(2*x[ind]) #relaxed
+		venue_sums[(j,k)].append(2*x[ind])
 	else:
 		venue_sums[(j,k)].append(1*x[ind])
 for key,val in venue_sums.items():
 	j = key[0]
 	k = key[1]
-	assignment_model += pulp.lpSum(val) <= venue_max[j]
+	assignment_model += pulp.lpSum(val) <= venue_max[j] + 0.01 #can be 0, potential numeric issue
 
 
 
@@ -509,6 +514,7 @@ for person in people:
 		person['solo_sharing_problem']=True
 
 venue_names = ['Main Sanctuary','Family Minyan','Torah in the Round']
+keychanges = {'childname':'Child Name','dob':"Date of Birth",'hschool':"Hebrew School",'school':"Academic School",'over200':"Number Guests",'sameday_party':"Party on Same Day?",'twin':"Twin?","shared":"Shared Ceremony",'top_venue':'Assigned Top-Ranked Venue','gbmbd':'Thirteenth Hebrew Birthday +1 day','weeks_after_earliest':"Number of Weeks after Earliest Possible Date"}
 for person in people:
 	# person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
 	# person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
@@ -525,10 +531,12 @@ for person in people:
 	person['top_venue'] = person['venue_prefs'][person['venue']] == max(person['venue_prefs'])
 	person['weeks_after_earliest'] = person['best_week_ind']-person['earliest_ind']
 	person['Venue']= venue_names[person['venue']]
+
+	# person['BM DT']=person['best_week']
 	person['BM Date'] = person['best_week'].strftime("%B %d, %Y")
 	person['gbmbd'] = date(*person['gbmbd']).strftime("%B %d, %Y")
 	person['dob']=person['dob'].strftime("%B %d, %Y")
-	keychanges = {'childname':'Child Name','dob':"Date of Birth",'hschool':"Hebrew School",'school':"Academic School",'over200':"Number Guests",'sameday_party':"Party on Same Day?",'twin':"Twin?","shared":"Shared Ceremony",'top_venue':'Assigned Top-Ranked Venue','gbmbd':'Thirteenth Hebrew Birthday','weeks_after_earliest':"Number of Weeks after Earliest Possible Date"}
+
 	for k, v in keychanges.items():
 		person[v]=person[k]
 people = sorted(people,key = lambda person: person['best_week'])
@@ -544,7 +552,7 @@ with outfile:
 		writer.writerow(person)
 
 
-optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
+optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday +1 day',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
 outfilename[-2] +='_solution_basic'
 outfilename = '.'.join(outfilename)
