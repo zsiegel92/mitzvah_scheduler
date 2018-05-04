@@ -1,3 +1,4 @@
+import sys
 import csv
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -5,7 +6,7 @@ import datetime
 from datetime import date, timedelta
 from convertdate import hebrew
 import pulp
-from Google_Submissions.extra_info import extra_kw, extra, blackouts,cycle_blackouts#,extra_defaults
+from Google_Submissions.extra_info import extra_kw, extra, blackouts,cycle_blackouts,cycle_blackouts2,venue_date_reserved#,extra_defaults
 
 
 heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','holiday_dates','nondate1','nondate2','nondate3','nondate4','sameday_party','twin','accommodations','more_info']
@@ -160,7 +161,32 @@ people_raw, headers,people = readfile(infile)
 
 
 cycle_blackout_index=2
+print(sys.argv)
+if len(sys.argv)>1:
+	try:
+		cycleinput = int(sys.argv[1])
+		print(f"BLACKOUT {cycle_blackouts[cycleinput]}")
+		cycle_blackout_index=cycleinput
+	except Exception as ee:
+		print(ee)
+		print("Failed to read input")
+
+cycle_blackout_index2=0
+print(sys.argv)
+if len(sys.argv)>2:
+	try:
+		cycleinput2 = int(sys.argv[2])
+		print(f"BLACKOUT2 {cycle_blackouts2[cycleinput2]}")
+		cycle_blackout_index2=cycleinput
+	except Exception as ee:
+		print(ee)
+		print("Failed to read input")
+
+
+
+
 blackouts.append(cycle_blackouts[cycle_blackout_index])
+blackouts.append(cycle_blackouts2[cycle_blackout_index2])
 blackout_inds = [dt_to_week(parse(d).date(),sat) for d in blackouts]
 
 
@@ -248,6 +274,7 @@ for person in people:
 
 num_unknown_schools = 0
 
+
 #Read extra_info.extras
 for person in people:
 	if (person['school'] is None) or (person['school'] == '') or ('school' not in person):
@@ -320,6 +347,24 @@ for person in people:
 		person['required_date_ind']=None
 	person['nondate_inds'] = [date_inds[d] for d in person['nondates'] if (date_inds.get(d) is not None)] #ignore nondate if outside range of potential dates
 
+
+#already_reserved contains (j,k) tuples of (date,venue)
+already_reserved =[]
+for key,val in venue_date_reserved.items():
+	j = val['required_venue']
+	dstring = val['required_date']
+
+	print(f"BLACKING OUT {dstring} AT {venue_names[j]}")
+
+	dt = parse(dstring).date()
+	d = dt_to_week(dt,sat)
+	if d in date_inds:
+		k = date_inds[d]
+		already_reserved.append((j,k))
+	else:
+		print("(this date is naturally free)")
+already_reserved_counts ={tup:already_reserved.count(tup) for tup in set(already_reserved)}
+print(already_reserved_counts)
 # twin & shared handling
 to_remove = []
 to_save = []
@@ -399,12 +444,13 @@ for i,person in enumerate(people):
 		for k in person['date_inds']:
 			I[(i,j,k)] = ind
 			Ix.append((i,j,k))
-			# ensure_mitzvah.append(1*x[ind])
-			# pref_vector.append((-5*person[venue_keys[j]])*x[ind]) #venue preferences
 			#set nondates equal to zero
 			if k in person['nondate_inds']:
 				# assignment_model += pulp.lpSum([1*x[ind]]) == 0
 				assignment_model += x[ind]==0
+
+			#venue_date_reserved something something
+
 			ind +=1
 	# assignment_model += pulp.lpSum(ensure_mitzvah)==1
 
@@ -511,7 +557,7 @@ for ind, (i,j,k) in enumerate(Ix):
 Im = {}
 Imx = []
 ind = 0
-for indind, (i,j,k) in enumerate(Ix):
+for (i,j,k) in Ix:
 	l = people[i]['school_id']
 	if (j,l,k) not in Imx: #or "if (j,l,k) not in Im"
 		Im[(j,l,k)]=ind
@@ -532,6 +578,33 @@ for d,k in date_inds.items():
 share_incentives = [venue_opening_penalty*mmm for mmm in m]
 
 
+## ONLY Torah in the Round or FM can have a BM on a given day, NOT both.
+# Im dict: key (j,l,k) -> index in m
+# Imx list: index in m -> (j,l,k)
+# Im2 dict: key (j,k) -> index in m2
+# Im2x list: index in m2 -> (j,k)
+# Im2 = {}
+# Im2x = []
+# ind = 0
+# for (j,l,k) in Imx:
+# 	if (j in [1,2]) and ((j,k) not in Im2x): #or "if (j,l,k) not in Im"
+# 		Im2[(j,k)]=ind
+# 		Im2x.append((j,k))
+# 		ind += 1
+# m2=pulp.LpVariable.dicts('school-date-limits',range(0,len(Im2x)),lowBound=0,upBound=1,cat=pulp.LpBinary)
+# for ind,(j,l,k) in enumerate(Imx):
+# 	if j in [1,2]:
+# 		assignment_model += m[ind] <= m2[Im2[(j,k)]]
+# for d,k in date_inds.items():
+# 	venue_date_sum =[]
+# 	for j in [1,2]:
+# 		if (j,k) in Im2:
+# 			venue_date_sum.append(m2[Im2[(j,k)]])
+# 	assignment_model+= pulp.lpSum(venue_date_sum) <= 1
+
+
+
+
 # # Venue restrictions
 venue_sums={}
 for ind, (i,j,k) in enumerate(Ix):
@@ -546,7 +619,7 @@ for ind, (i,j,k) in enumerate(Ix):
 for key,val in venue_sums.items():
 	j = key[0]
 	k = key[1]
-	assignment_model += pulp.lpSum(val) <= venue_max[j] + 0.01 #can be 0, potential numeric issue
+	assignment_model += pulp.lpSum(val) <= venue_max[j] - already_reserved_counts.get((j,k),0) #can be 0, potential numeric issue
 
 
 
@@ -653,7 +726,7 @@ with outfile:
 
 optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday +1 day',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
-outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d")
+outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d") + 'springblackout_' + parse(cycle_blackouts2[cycle_blackout_index2]).date().strftime("%m-%d")
 outfilename = '.'.join(outfilename)
 outfile = open(outfilename,'w')
 with outfile:
