@@ -5,7 +5,7 @@ import datetime
 from datetime import date, timedelta
 from convertdate import hebrew
 import pulp
-from Google_Submissions.extra_info import extra_kw, extra#,extra_defaults
+from Google_Submissions.extra_info import extra_kw, extra, blackouts,cycle_blackouts#,extra_defaults
 
 
 heads = ['timestamp','email','childname','dob','hschool','school','pref_main','pref_family','pref_torah','over200','holiday_dates','nondate1','nondate2','nondate3','nondate4','sameday_party','twin','accommodations','more_info']
@@ -25,10 +25,19 @@ nondatekeys=['nondate1','nondate2','nondate3','nondate4']
 # VEADAR = 13
 hmonths = ['NISAN','IYYAR','SIVAN','TAMMUZ','AV','ELUL','TISHRI','HESHVAN','KISLEV','TEVETH','SHEVAT','ADAR','VEADAR']
 weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-
+venue_names = ['Main Sanctuary','Family Minyan','Torah in the Round']
 
 early_threshold = 0 # number weeks before birthday allowed
-late_threshold = 25 # number of weeks after birthday at which mitzvah is not allowed
+late_threshold = 50 # number of weeks after birthday at which mitzvah is not allowed
+request_after_late_threshold = 4
+request_weekly_penalty_factor = 1
+constant_request_reward = 5
+required_reward = 5
+penalty_per_week = 2
+pref_reward=2
+venue_opening_penalty = 0.01 #to try to coerce shared BMs
+
+
 venues = 3
 venue_max = 2 # max number of mitzvahs per venue per day
 venue_max = [2,1,1] #main, family minyan, torah in the round
@@ -107,7 +116,8 @@ def stringify_hdate(hdate):
 
 def unpack(dt):
 	return (dt.year,dt.month,dt.day)
-
+def pack(y,m,d):
+	return date(y,m,d)
 
 def parse_pref(pref):
 	if (pref == None) or (pref == ""):
@@ -139,7 +149,7 @@ today = datetime.datetime.today().date()
 sat = dt_next_sat(today)
 summer_end_str= "Saturday, September 4, 2021"
 summer_start_str = "Saturday, June 5, 2021"
-summer_range = (parse(summer_start_str),parse(summer_end_str))
+summer_range = (parse(summer_start_str).date(),parse(summer_end_str).date())
 summer_start = dt_to_week(parse(summer_start_str).date(),sat)
 summer_length = 10
 summer_dates = list(range(summer_start,summer_start + summer_length + 1))
@@ -147,6 +157,11 @@ summer_dates = list(range(summer_start,summer_start + summer_length + 1))
 infile = 'Google_Submissions/Mitzvah Scheduling.csv'
 # constraints = readfile('constraints.csv')
 people_raw, headers,people = readfile(infile)
+
+
+cycle_blackout_index=2
+blackouts.append(cycle_blackouts[cycle_blackout_index])
+blackout_inds = [dt_to_week(parse(d).date(),sat) for d in blackouts]
 
 
 for person in people:
@@ -208,6 +223,7 @@ for person in people:
 					d= dt_next_sat(d)
 			nondates.append(dt_to_week(d,sat))
 
+	nondates = list(set(nondates + blackout_inds))
 
 	person['hDOB']= hdob
 	person['dob']=dob
@@ -263,19 +279,13 @@ for person in people:
 			person['notsameday'] = [index_by_name(aname,people) for aname in person['notsameday']]
 		if person['requested_after'] is not None:
 			#Arbitrary - if bm requested after date, treat that date as birthday
-			for d in range(person['requested_after'],person['requested_after']+ late_threshold):
+			for d in range(person['requested_after'],person['requested_after']+ request_after_late_threshold):
 				person['requested_dates'].append(d)
 		if (person['required_date'] is not None) and (person['required_date'] not in person['requested_dates']):
 			person['requested_dates'].append(person['required_date'])
+		if person['exactrequest'] is True:
+			person['requested_dates'].append(person['weeks_til']) #in format of requested_dates
 
-
-schools = sorted(list({person.get('school') for person in people}))
-hschools = sorted(list({person.get('hschool') for person in people}))
-dates = {d for person in people for d in range(person['earliest'],person['latest']+1)}| {d for person in people for d in person['requested_dates']}
-# print(dates)
-# print("\n".join([f"{person['childname']} : {[week_to_date(d,sat) for d in person['requested_dates'] ]}" for person in people]))
-# print("\n".join([f"{person['childname']} : {[d for d in person['requested_dates'] ]}" for person in people]))
-dates = sorted(list(dates))
 
 for person in people:
 	if 'lainer' in person['school'].lower():
@@ -284,21 +294,31 @@ for person in people:
 		person['hschool']='The Lainer School of Sinai Temple'
 
 
-date_inds = {date : i for i, date in enumerate(dates)}
+schools = sorted(list({person.get('school') for person in people}))
+hschools = sorted(list({person.get('hschool') for person in people}))
+dates = {d for person in people for d in range(person['earliest'],person['latest']+1)}| {d for person in people for d in person['requested_dates']}
+
+# print(dates)
+# print("\n".join([f"{person['childname']} : {[week_to_date(d,sat) for d in person['requested_dates'] ]}" for person in people]))
+# print("\n".join([f"{person['childname']} : {[d for d in person['requested_dates'] ]}" for person in people]))
+dates = sorted(list(dates))
+date_inds = {date : k for k, date in enumerate(dates)}
+
+
 for person in people:
 	person['school_id'] = schools.index(person['school'])
 	person['bday_index'] = date_inds[person['weeks_til']]
 	person['earliest_index'] = date_inds[person['earliest']]
+	early_ind = person['earliest_index']
 	person['latest_index'] = date_inds[person['latest']]
-	person['date_inds'] =list(range(person['earliest_index'],person['latest_index'])) + [date_inds[thing] for thing in person['requested_dates']]
-	person['requested_date_inds'] = [date_inds[thing] for thing in person['requested_dates']]
+	person['date_inds'] =list(range(person['earliest_index'],person['latest_index'])) + [date_inds[thing] for thing in person['requested_dates'] if date_inds[thing]>=early_ind]
+	person['requested_date_inds'] = [date_inds[thing] for thing in person['requested_dates'] if date_inds[thing]>=early_ind]
+	# Remove 'if' statements in last two lines to allow requests for dates before "birthday+1" (such as "birthday")
 	if person['required_date'] is not None:
 		person['required_date_ind'] = date_inds[person['required_date']]
 	else:
 		person['required_date_ind']=None
 	person['nondate_inds'] = [date_inds[d] for d in person['nondates'] if (date_inds.get(d) is not None)] #ignore nondate if outside range of potential dates
-
-
 
 # twin & shared handling
 to_remove = []
@@ -326,10 +346,24 @@ for person in to_remove:
 	if person in people:
 		people.remove(person)
 print(f"len people: {len(people)}")
+
+
+
+## DONE ALTERING people
+
+students_by_school = [[i for i,person in enumerate(people) if person['school_id']==l] for l,school in enumerate(schools)]
+
+# for l,schname in enumerate(schools):
+# 	print(f"{schname}: {list(map(lambda i:people[i]['childname'],students_by_school[l]))}\n")
+
+
+
+
+
 # # school_date_conflicts[(school_id,d)]=[i1,i2,i3,...] contains a list of all indices of students eligible for mitzvah on day d who attend school school_id. All such lists are of length at least 2, otherwise no conflict.
 # # date_prospects[d] contains a list of tuples (i,l) where for person indices i and school_id l if person i is eligible for mitzvah on date d
 school_date_conflicts = {}
-date_prospects = [[] for d in dates]
+date_prospects = [[] for d,k in date_inds.items()]
 for i,person in enumerate(people):
 	schoolid = person['school_id']
 	# for d in range(person['earliest_index'],person['latest_index']):
@@ -348,10 +382,8 @@ for person in people:
 
 
 n = sum(((len(person['date_inds']))*venues for person in people)) # x_i_j_k is person i at venue j, date k
-print("Number of decision variables (excluding extra requirements): " + str(n))
-
 x=pulp.LpVariable.dicts('assignments',range(0,n),lowBound=0,upBound=1,cat=pulp.LpBinary)
-m=pulp.LpVariable.dicts('school-date-limits',range(0,len(school_date_conflicts)*venues),lowBound=0,upBound=1,cat=pulp.LpBinary)
+# m=pulp.LpVariable.dicts('school-date-limits',range(0,len(school_date_conflicts)*venues),lowBound=0,upBound=1,cat=pulp.LpBinary)
 assignment_model=pulp.LpProblem('assignment model',pulp.LpMinimize)
 
 
@@ -361,7 +393,6 @@ ind = 0
 # forall i, Sum_j,k x_i_j_k == 1
 # x[I[(i,j,k)]] = x_i_j_k
 # Ix[I[(i,j,k)]] = (i,j,k)
-pref_vector = []
 for i,person in enumerate(people):
 	ensure_mitzvah=[]
 	for j in range(venues):
@@ -382,12 +413,12 @@ pref_vector = []
 for ind, (i,j,k) in enumerate(Ix):
 	ensure_mitzvah[i].append(1*x[ind])
 	person = people[i]
-	pref_vector.append((-2*person[venue_keys[j]])*x[ind])
+	pref_vector.append((-pref_reward*person[venue_keys[j]])*x[ind])
 for ls in ensure_mitzvah:
 	assignment_model += pulp.lpSum(ls)==1
 
 
-# # Lainer students don't have same-day BMs
+# # Lainer students - no more than 2 same day. Actually goes for all schools.
 # # Can comment/uncomment ALL of this
 lainer_sums={}
 for ind, (i,j,k) in enumerate(Ix):
@@ -395,9 +426,12 @@ for ind, (i,j,k) in enumerate(Ix):
 		lainer_sums[k]=[]
 	person = people[i]
 	if "lainer" in person['school'].lower():
-		lainer_sums[k].append(1*x[ind])
+		if ('yes' in person['twin'].lower()) or (person.get('solo')==True):
+			lainer_sums[k].append(2*x[ind])
+		else:
+			lainer_sums[k].append(1*x[ind])
 for k,val in lainer_sums.items():
-	assignment_model += pulp.lpSum(val) <= 1
+	assignment_model += pulp.lpSum(val) <= 2
 
 # All schools, limit to one student per day - can comment out this entire block if not a true requirement
 school_sums = {}
@@ -412,7 +446,7 @@ for sch in schools:
 			sch_sum[k].append(1*x[ind])
 	for k,val in sch_sum.items():
 		# print(f"lainer_sums list has {len(val)} elements")
-		assignment_model += pulp.lpSum(val) <= 1.01 #can be 0, potential numeric issue
+		assignment_model += pulp.lpSum(val) <= 2 #can be 0, potential numeric issue
 
 
 
@@ -421,46 +455,81 @@ for sch in schools:
 
 # # Add penalty for bnei mitzvah being n weeks after birthday.
 # #OPTIONAL: minimize number of venues in use per weekend? is there "pulp.lpMax" for m[ind] variables?
-penalty_per_week = 2
 # lateness_penalties = [penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind] for ind, (i,j,k) in enumerate(Ix)]
 lateness_penalties =[]
 for ind, (i,j,k) in enumerate(Ix):
 	person = people[i]
 	#weekly penalty for requested dates vs regular dates
-	request_weekly_penalty_factor = 0.2
 	if k not in person['requested_date_inds']: #regular date
 		pen = penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind]
 		# pref_vector.append((-1*person[venue_keys[j]])*x[ind]) #venue preferences
 	elif k == person.get('required_date_ind'): #required date
 		# pref_vector.append((-5*person[venue_keys[j]] - 5)*x[ind]) #venue preferences
-		pen = -5*x[ind]
+		pen = -required_reward*x[ind]
 	else: #requested date
 		# pref_vector.append((-1*person[venue_keys[j]] - 5)*x[ind]) #venue preferences
-		pen = request_weekly_penalty_factor*penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) - 3)*x[ind]
+		pen = request_weekly_penalty_factor*penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) - constant_request_reward)*x[ind]
 	# pen = penalty_per_week*((abs(dates[k]-people[i]['weeks_til'])) + person['days_before_sat']*(1/7))*x[ind]
 	lateness_penalties.append(pen)
 #Add days before sat*(1/7) to ensure that older students receive a slightly larger penalty than younger students, enforcing which will yield earlier BMs
 
-assignment_model += pulp.lpSum(lateness_penalties + pref_vector) #add to objective function
-
 
 # school_date_conflicts[(school_id,d)]=[i1,i2,i3,...] contains a list of all indices of students eligible for mitzvah on day d who attend school school_id.
+# Im = {}
+# Imx = []
+# ind = 0
+
+# numconsts=0
+# # for k,v in school_date_conflicts.items():
+# # 	print(f"{k}: {v}")
+# onevenues={}
+# for ((l,k),students) in school_date_conflicts.items():
+# 	onevenue = []
+# 	for j in range(venues):
+# 		Im[(j,l,k)] = ind
+# 		Imx.append((j,l,k))
+# 		onevenue.append(1*m[ind])
+# 		if (l,k) not in onevenues:
+# 			onevenues[(l,k)]=[]
+# 		onevenues[(l,k)].append(1*m[ind])
+# 		for i in students:
+# 			# assignment_model += x[I[(i,j,k)]] <= m[ind]
+# 			numconsts+=1
+# 		ind +=1
+# 	# assignment_model += pulp.lpSum(onevenue)<=1
+# 	# assignment_model += pulp.lpSum(onevenues[(l,k)])<=1 #can be 0, potential numeric
+# print(f"Number school-date constraints: {numconsts}")
+
+
+
+## Ensure that each school only has students at one venue per day
+
+# x[I[(i,j,k)]] = x_i_j_k
+# Ix[I[(i,j,k)]] = (i,j,k)
+# Im dict: key (j,l,k) -> index in m
+# Imx list: index in m -> (j,l,k)
 Im = {}
 Imx = []
 ind = 0
-# for k,v in school_date_conflicts.items():
-# 	print(f"{k}: {v}")
-for ((l,k),students) in school_date_conflicts.items():
-	onevenue = []
-	for j in range(venues):
-		Im[(j,l,k)] = ind
+for indind, (i,j,k) in enumerate(Ix):
+	l = people[i]['school_id']
+	if (j,l,k) not in Imx: #or "if (j,l,k) not in Im"
+		Im[(j,l,k)]=ind
 		Imx.append((j,l,k))
-		onevenue.append(1*m[ind])
-		for i in students:
-			assignment_model += pulp.lpSum([1*x[I[(i,j,k)]],-1*m[ind]]) <= .01 #can be 0, potential numeric issue
-		ind +=1
-	assignment_model += pulp.lpSum(onevenue)<=1.01 #can be 0, potential numeric issue
+		ind += 1
+m=pulp.LpVariable.dicts('school-date-limits',range(0,len(Imx)),lowBound=0,upBound=1,cat=pulp.LpBinary)
+for ind,(i,j,k) in enumerate(Ix):
+	l = people[i]['school_id']
+	assignment_model += x[ind] <= m[Im[(j,l,k)]]
+for d,k in date_inds.items():
+	for l, schname in enumerate(schools):
+		schdatesum =[]
+		for j in range(venues):
+			if (j,l,k) in Im:
+				schdatesum.append(m[Im[(j,l,k)]])
+		assignment_model+= pulp.lpSum(schdatesum) <= 1
 
+share_incentives = [venue_opening_penalty*mmm for mmm in m]
 
 
 # # Venue restrictions
@@ -481,25 +550,53 @@ for key,val in venue_sums.items():
 
 
 
+assignment_model += pulp.lpSum(lateness_penalties + pref_vector + share_incentives) #add to objective function
+
+print("Number of total mitzvah options: " + str(n))
+print("Number of total decisions: " + str(len(x) + len(m)))
 assignment_model.solve()
 status = assignment_model.status
 statuses = {1:"optimal",0:"not solved",-1:"infeasible",-2:"unbounded",-3:"undefined"}
 print(f"Status is: '{statuses[status]}'")
 x =[val.varValue for k,val in x.items()]
+m = [val.varValue for k,val in m.items()]
 
 ones = [i for i, v in enumerate(x) if v == 1]
+ones_m = [i for i,v in enumerate(m) if v == 1]
 winners = [Ix[v] for v in ones]
+winners_m = [Imx[v] for v in ones_m]
+
+
+
+## Logging which schools have ceremonies on which days
+winnerlog={}
+for (j,l,k) in winners_m:
+	# week_to_date(dates[k],sat)
+	d = dates[k]
+	schname = schools[l]
+	if d not in winnerlog:
+		winnerlog[d]=[]
+	winnerlog[d].append((venue_names[j],schname))
+
+# for k,v in sorted(winnerlog.items(),key=lambda zz: zz[0]):
+# 	print(f"{week_to_date(k,sat)}: {v}")
+
+
 
 for (i,j,k) in winners:
 	people[i]['venue'] = j
 	people[i]['best_week'] = dates[k]
-
+	#can uncomment this:
+	people[i]['venues_schools_allowed_on_day']=[]
+	if dates[k] in winnerlog:#should be
+		people[i]['venues_schools_allowed_on_day'] = winnerlog[dates[k]]
 
 for person in people:
 	person['venue_sharing_problem']=False
 	person['solo_sharing_problem']=False
 	person['lainer_sharing_problem']=False
 	person['same_school_sameday']=False
+	person['same_school_sameday_dif_venues']=False
 	person['shared']=False
 	for other in people:
 		if (other['best_week']==person['best_week']) and (other['venue'] == person['venue']) and (other['childname'] != person['childname']):
@@ -510,11 +607,13 @@ for person in people:
 			person['lainer_sharing_problem']=True
 		if (other['best_week']==person['best_week']) and (other['school'] == person['school']) and (other['childname'] != person['childname']):
 			person['same_school_sameday']=True
+			if person['venue'] != other['venue']:
+				person['same_school_sameday_dif_venues']=True
 	if person['shared']==True and person['solo']==True:
 		person['solo_sharing_problem']=True
 
-venue_names = ['Main Sanctuary','Family Minyan','Torah in the Round']
-keychanges = {'childname':'Child Name','dob':"Date of Birth",'hschool':"Hebrew School",'school':"Academic School",'over200':"Number Guests",'sameday_party':"Party on Same Day?",'twin':"Twin?","shared":"Shared Ceremony",'top_venue':'Assigned Top-Ranked Venue','gbmbd':'Thirteenth Hebrew Birthday +1 day','weeks_after_earliest':"Number of Weeks after Earliest Possible Date"}
+
+keychanges = {'childname':'Child Name','dob':"Date of Birth",'hschool':"Hebrew School",'school':"Academic School",'over200':"Number Guests",'sameday_party':"Party on Same Day?",'twin':"Twin?","shared":"Shared Ceremony",'top_venue':'Assigned Top-Ranked Venue','gbmbd':'Thirteenth Hebrew Birthday +1 day','weeks_after_earliest':"Number of Weeks after Earliest Possible Date","same_school_sameday_dif_venues":"Sameday Problem","venues_schools_allowed_on_day":"Venues Allowed"}
 for person in people:
 	# person['earliest'] = (sat + relativedelta(weeks=person['earliest'])).strftime("%A, %B %d, %Y")
 	# person['latest'] = (sat + relativedelta(weeks=person['latest'])).strftime("%A, %B %d, %Y")
@@ -554,7 +653,7 @@ with outfile:
 
 optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday +1 day',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
-outfilename[-2] +='_solution_basic'
+outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d")
 outfilename = '.'.join(outfilename)
 outfile = open(outfilename,'w')
 with outfile:
