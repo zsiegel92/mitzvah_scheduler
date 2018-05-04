@@ -579,28 +579,28 @@ share_incentives = [venue_opening_penalty*mmm for mmm in m]
 
 
 ## ONLY Torah in the Round or FM can have a BM on a given day, NOT both.
-# Im dict: key (j,l,k) -> index in m
-# Imx list: index in m -> (j,l,k)
-# Im2 dict: key (j,k) -> index in m2
-# Im2x list: index in m2 -> (j,k)
-# Im2 = {}
-# Im2x = []
-# ind = 0
-# for (j,l,k) in Imx:
-# 	if (j in [1,2]) and ((j,k) not in Im2x): #or "if (j,l,k) not in Im"
-# 		Im2[(j,k)]=ind
-# 		Im2x.append((j,k))
-# 		ind += 1
-# m2=pulp.LpVariable.dicts('school-date-limits',range(0,len(Im2x)),lowBound=0,upBound=1,cat=pulp.LpBinary)
-# for ind,(j,l,k) in enumerate(Imx):
-# 	if j in [1,2]:
-# 		assignment_model += m[ind] <= m2[Im2[(j,k)]]
-# for d,k in date_inds.items():
-# 	venue_date_sum =[]
-# 	for j in [1,2]:
-# 		if (j,k) in Im2:
-# 			venue_date_sum.append(m2[Im2[(j,k)]])
-# 	assignment_model+= pulp.lpSum(venue_date_sum) <= 1
+## Im dict: key (j,l,k) -> index in m
+## Imx list: index in m -> (j,l,k)
+## Im2 dict: key (j,k) -> index in m2
+## Im2x list: index in m2 -> (j,k)
+Im2 = {}
+Im2x = []
+ind = 0
+for (j,l,k) in Imx:
+	if (j in [1,2]) and ((j,k) not in Im2x): #or "if (j,l,k) not in Im"
+		Im2[(j,k)]=ind
+		Im2x.append((j,k))
+		ind += 1
+m2=pulp.LpVariable.dicts('venue_date_limits',range(0,len(Im2x)),lowBound=0,upBound=1,cat=pulp.LpBinary)
+for ind,(j,l,k) in enumerate(Imx):
+	if j in [1,2]:
+		assignment_model += m[ind] <= m2[Im2[(j,k)]]
+for d,k in date_inds.items():
+	venue_date_sum =[]
+	for j in [1,2]:
+		if (j,k) in Im2:
+			venue_date_sum.append(m2[Im2[(j,k)]])
+	assignment_model+= pulp.lpSum(venue_date_sum) <= 1
 
 
 
@@ -627,7 +627,12 @@ assignment_model += pulp.lpSum(lateness_penalties + pref_vector + share_incentiv
 
 print("Number of total mitzvah options: " + str(n))
 print("Number of total decisions: " + str(len(x) + len(m)))
-assignment_model.solve()
+
+try:
+     assignment_model.solve()
+except Exception:
+     print('PROBLEM INFEASIBLE')
+
 status = assignment_model.status
 statuses = {1:"optimal",0:"not solved",-1:"infeasible",-2:"unbounded",-3:"undefined"}
 print(f"Status is: '{statuses[status]}'")
@@ -726,7 +731,7 @@ with outfile:
 
 optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday +1 day',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
-outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d") + 'springblackout_' + parse(cycle_blackouts2[cycle_blackout_index2]).date().strftime("%m-%d")
+outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d") + '_springblackout_' + parse(cycle_blackouts2[cycle_blackout_index2]).date().strftime("%m-%d")
 outfilename = '.'.join(outfilename)
 outfile = open(outfilename,'w')
 with outfile:
