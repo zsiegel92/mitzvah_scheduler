@@ -29,7 +29,7 @@ weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunda
 venue_names = ['Main Sanctuary','Family Minyan','Torah in the Round']
 
 early_threshold = 0 # number weeks before birthday allowed
-late_threshold = 50 # number of weeks after birthday at which mitzvah is not allowed
+late_threshold = 30 # number of weeks after birthday at which mitzvah is not allowed
 request_after_late_threshold = 4
 request_weekly_penalty_factor = 1
 constant_request_reward = 5
@@ -160,7 +160,7 @@ infile = 'Google_Submissions/Mitzvah Scheduling.csv'
 people_raw, headers,people = readfile(infile)
 
 
-cycle_blackout_index=2
+cycle_blackout_index=3
 print(sys.argv)
 if len(sys.argv)>1:
 	try:
@@ -177,16 +177,21 @@ if len(sys.argv)>2:
 	try:
 		cycleinput2 = int(sys.argv[2])
 		print(f"BLACKOUT2 {cycle_blackouts2[cycleinput2]}")
-		cycle_blackout_index2=cycleinput
+		cycle_blackout_index2=cycleinput2
 	except Exception as ee:
 		print(ee)
 		print("Failed to read input")
 
 
 
-
-blackouts.append(cycle_blackouts[cycle_blackout_index])
-blackouts.append(cycle_blackouts2[cycle_blackout_index2])
+try:
+	blackouts.append(cycle_blackouts[cycle_blackout_index])
+except:
+	pass
+try:
+	blackouts.append(cycle_blackouts2[cycle_blackout_index2])
+except:
+	pass
 blackout_inds = [dt_to_week(parse(d).date(),sat) for d in blackouts]
 
 
@@ -479,7 +484,7 @@ for ind, (i,j,k) in enumerate(Ix):
 for k,val in lainer_sums.items():
 	assignment_model += pulp.lpSum(val) <= 2
 
-# All schools, limit to one student per day - can comment out this entire block if not a true requirement
+# All schools, limit to one or two students per day - can comment out this entire block if not a true requirement
 school_sums = {}
 for sch in schools:
 	sch_sum = {}
@@ -496,8 +501,16 @@ for sch in schools:
 
 
 
-
-
+#Torah in the Round and Family Minyan alternate.
+for ind, (i,j,k) in enumerate(Ix):
+	if (j == 1):
+		#odd weeks disallowed at FM
+		if (dates[k] % 2 == 1):
+			assignment_model += x[ind] == 0
+	elif (j == 2):
+		#even weeks disallowed at TITR
+		if (dates[k] % 2 == 0):
+			assignment_model += x[ind] ==0
 
 # # Add penalty for bnei mitzvah being n weeks after birthday.
 # #OPTIONAL: minimize number of venues in use per weekend? is there "pulp.lpMax" for m[ind] variables?
@@ -583,24 +596,25 @@ share_incentives = [venue_opening_penalty*mmm for mmm in m]
 ## Imx list: index in m -> (j,l,k)
 ## Im2 dict: key (j,k) -> index in m2
 ## Im2x list: index in m2 -> (j,k)
-Im2 = {}
-Im2x = []
-ind = 0
-for (j,l,k) in Imx:
-	if (j in [1,2]) and ((j,k) not in Im2x): #or "if (j,l,k) not in Im"
-		Im2[(j,k)]=ind
-		Im2x.append((j,k))
-		ind += 1
-m2=pulp.LpVariable.dicts('venue_date_limits',range(0,len(Im2x)),lowBound=0,upBound=1,cat=pulp.LpBinary)
-for ind,(j,l,k) in enumerate(Imx):
-	if j in [1,2]:
-		assignment_model += m[ind] <= m2[Im2[(j,k)]]
-for d,k in date_inds.items():
-	venue_date_sum =[]
-	for j in [1,2]:
-		if (j,k) in Im2:
-			venue_date_sum.append(m2[Im2[(j,k)]])
-	assignment_model+= pulp.lpSum(venue_date_sum) <= 1
+# Im2 = {}
+# Im2x = []
+# ind = 0
+# for (j,l,k) in Imx:
+# 	if (j in [1,2]) and ((j,k) not in Im2x): #or "if (j,l,k) not in Im"
+# 		Im2[(j,k)]=ind
+# 		Im2x.append((j,k))
+# 		ind += 1
+# m2=pulp.LpVariable.dicts('venue_date_limits',range(0,len(Im2x)),lowBound=0,upBound=1,cat=pulp.LpBinary)
+# for ind,(j,l,k) in enumerate(Imx):
+# 	if j in [1,2]:
+# 		assignment_model += m[ind] <= m2[Im2[(j,k)]]
+# for d,k in date_inds.items():
+# 	venue_date_sum =[]
+# 	for j in [1,2]:
+# 		if (j,k) in Im2:
+# 			# assignment_model += m2[Im2[(j,k)]] == (d - int(j==1) %2) #if j==1, odd weeks OK, otherwise even weeks okay
+# 			venue_date_sum.append(m2[Im2[(j,k)]])
+# 	# assignment_model+= pulp.lpSum(venue_date_sum) <= 1
 
 
 
@@ -626,8 +640,10 @@ for key,val in venue_sums.items():
 assignment_model += pulp.lpSum(lateness_penalties + pref_vector + share_incentives) #add to objective function
 
 print("Number of total mitzvah options: " + str(n))
-print("Number of total decisions: " + str(len(x) + len(m)))
-
+try:
+	print("Number of total decisions: " + str(len(x) + len(m)))
+except:
+	print("Number of total decisions: " + str(len(x) + len(m)))
 try:
      assignment_model.solve()
 except Exception:
@@ -731,7 +747,8 @@ with outfile:
 
 optheads = ['Child Name',"Date of Birth","Number Guests",'accommodations','more_info','Assigned Top-Ranked Venue',"Hebrew School","Academic School",'Venue','Thirteenth Hebrew Birthday +1 day',"Number of Weeks after Earliest Possible Date",'BM Date','Shared Ceremony']
 outfilename = infile.split('.')
-outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d") + '_springblackout_' + parse(cycle_blackouts2[cycle_blackout_index2]).date().strftime("%m-%d")
+# outfilename[-2] +='_solution_basic' + '_febblackout_' + parse(cycle_blackouts[cycle_blackout_index]).date().strftime("%m-%d") + '_springblackout_' + parse(cycle_blackouts2[cycle_blackout_index2]).date().strftime("%m-%d")
+outfilename[-2] += '_solution_basic' + '_customblackouts'
 outfilename = '.'.join(outfilename)
 outfile = open(outfilename,'w')
 with outfile:
