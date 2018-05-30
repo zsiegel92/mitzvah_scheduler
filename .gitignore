@@ -1,3 +1,5 @@
 venv/
 mitzvah/node_modules/
 Google_Submissions/
+mitzvah_timesheets/
+.env
